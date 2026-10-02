@@ -17,19 +17,24 @@ def _make_engine():
     kwargs: dict = {}
 
     if url.startswith("sqlite"):
-        kwargs["connect_args"] = {"check_same_thread": False}
+        kwargs["connect_args"] = {
+            "check_same_thread": False,
+            "timeout": 60,  # Esperar hasta 60s antes de error de bloqueo bajo alta concurrencia
+        }
 
     return create_engine(url, **kwargs)
 
 
 engine = _make_engine()
 
-# Habilitar FK constraints en SQLite (desactivadas por defecto)
+# Optimizaciones de concurrencia e integridad en SQLite
 if settings.database_url.startswith("sqlite"):
     @event.listens_for(engine, "connect")
     def _set_sqlite_pragma(dbapi_conn, _connection_record):
         cursor = dbapi_conn.cursor()
         cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.execute("PRAGMA journal_mode=WAL")       # Concurrencia de múltiples lectores y un escritor sin bloqueos
+        cursor.execute("PRAGMA synchronous=NORMAL")     # Rendimiento acelerado de I/O en disco seguro
         cursor.close()
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, expire_on_commit=False, bind=engine)

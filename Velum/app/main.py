@@ -227,8 +227,9 @@ def render_dashboard(request: Request):
     return templates.TemplateResponse(request=request, name="index.html")
 
 
-# Incluir routers de la API
-app.include_router(transactions.router)
-app.include_router(transactions.v1_router)  # Alias /api/v1/transactions
+# Incluir routers de la API (cubriendo todas las variantes de ruta para el bot)
+for r in transactions.ALL_TRANSACTION_ROUTERS:
+    app.include_router(r)
+
 app.include_router(dashboard.router)
 app.include_router(simulator.router)

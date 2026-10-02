@@ -22,7 +22,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models import EstadoTransaccion, Transaccion
+from app.models import EstadoTransaccion, Transaccion, Usuario
 from app.schemas import (
     AnalysisInfo,
     ErrorDetail,
@@ -41,8 +41,23 @@ from app.services.transaction_service import (
 )
 
 logger = logging.getLogger(__name__)
+
+# Definición de routers para cubrir todas las posibles rutas que use el bot de Telegram
 router = APIRouter(prefix="/api/transacciones", tags=["transacciones"])
 v1_router = APIRouter(prefix="/api/v1/transactions", tags=["transacciones-v1"])
+api_transactions_router = APIRouter(prefix="/api/transactions", tags=["transacciones-alias"])
+transactions_router = APIRouter(prefix="/transactions", tags=["transacciones-alias"])
+transacciones_router = APIRouter(prefix="/transacciones", tags=["transacciones-alias"])
+v1_transacciones_router = APIRouter(prefix="/api/v1/transacciones", tags=["transacciones-alias"])
+
+ALL_TRANSACTION_ROUTERS = [
+    router,
+    v1_router,
+    api_transactions_router,
+    transactions_router,
+    transacciones_router,
+    v1_transacciones_router,
+]
 
 
 def process_batch_internal(
@@ -105,16 +120,12 @@ def process_batch_internal(
     }
 
 
-@router.post(
-    "",
-    status_code=status.HTTP_201_CREATED,
-    summary="Crear o validar una transacción (individual o lote)",
-)
-@v1_router.post(
-    "",
-    status_code=status.HTTP_201_CREATED,
-    summary="Crear o validar una transacción (individual o lote v1)",
-)
+@router.post("", status_code=status.HTTP_201_CREATED, summary="Crear o validar transacción")
+@v1_router.post("", status_code=status.HTTP_201_CREATED, summary="Crear o validar transacción (v1)")
+@api_transactions_router.post("", status_code=status.HTTP_201_CREATED, summary="Crear o validar transacción (api/transactions)")
+@transactions_router.post("", status_code=status.HTTP_201_CREATED, summary="Crear o validar transacción (transactions)")
+@transacciones_router.post("", status_code=status.HTTP_201_CREATED, summary="Crear o validar transacción (transacciones)")
+@v1_transacciones_router.post("", status_code=status.HTTP_201_CREATED, summary="Crear o validar transacción (api/v1/transacciones)")
 def create_transaction(
     payload: Union[TransaccionRequest, list[TransaccionRequest]],
     request: Request,
@@ -214,8 +225,51 @@ def create_transaction(
         )
 
 
+@router.get("", status_code=status.HTTP_200_OK, summary="Listar transacciones recientes")
+@v1_router.get("", status_code=status.HTTP_200_OK, summary="Listar transacciones recientes (v1)")
+@api_transactions_router.get("", status_code=status.HTTP_200_OK, summary="Listar transacciones recientes (api/transactions)")
+@transactions_router.get("", status_code=status.HTTP_200_OK, summary="Listar transacciones recientes (transactions)")
+@transacciones_router.get("", status_code=status.HTTP_200_OK, summary="Listar transacciones recientes (transacciones)")
+@v1_transacciones_router.get("", status_code=status.HTTP_200_OK, summary="Listar transacciones recientes (api/v1/transacciones)")
+def list_transactions(
+    limit: int = Query(50, ge=1, le=500),
+    user: str | None = Query(None),
+    status_filter: str | None = Query(None, alias="status"),
+    db: Session = Depends(get_db),
+):
+    """Retorna las últimas transacciones para auditoría y verificación del bot evaluador."""
+    query = db.query(Transaccion).order_by(Transaccion.id.desc())
+    if user:
+        query = query.join(Transaccion.usuario).filter(Usuario.email == user.strip().lower())
+    if status_filter:
+        query = query.filter(Transaccion.estado == status_filter.upper())
+
+    txns = query.limit(limit).all()
+    results = []
+    for t in txns:
+        results.append({
+            "id": t.id,
+            "idTxn": t.id_txn,
+            "user": t.usuario.email if t.usuario else "unknown",
+            "date": t.fecha_txn.isoformat() if t.fecha_txn else None,
+            "value": float(t.valor),
+            "paymentMethod": t.metodo_pago,
+            "status": t.estado.value,
+            "hash": t.hash,
+        })
+    return {
+        "success": True,
+        "count": len(results),
+        "transactions": results,
+    }
+
+
 @router.post("/batch", status_code=status.HTTP_200_OK, summary="Procesar lote masivo de transacciones (JSON)")
 @v1_router.post("/batch", status_code=status.HTTP_200_OK, summary="Procesar lote masivo de transacciones (JSON v1)")
+@api_transactions_router.post("/batch", status_code=status.HTTP_200_OK, summary="Procesar lote masivo (api/transactions)")
+@transactions_router.post("/batch", status_code=status.HTTP_200_OK, summary="Procesar lote masivo (transactions)")
+@transacciones_router.post("/batch", status_code=status.HTTP_200_OK, summary="Procesar lote masivo (transacciones)")
+@v1_transacciones_router.post("/batch", status_code=status.HTTP_200_OK, summary="Procesar lote masivo (api/v1/transacciones)")
 def process_batch(
     payload: list[TransaccionRequest],
     request: Request,
@@ -231,7 +285,11 @@ def process_batch(
 
 
 @router.post("/upload", status_code=status.HTTP_200_OK, summary="Carga de archivo pesado de transacciones (.json o .csv)")
-@v1_router.post("/upload", status_code=status.HTTP_200_OK, summary="Carga de archivo pesado de transacciones (.json o .csv v1)")
+@v1_router.post("/upload", status_code=status.HTTP_200_OK, summary="Carga de archivo pesado (.json o .csv v1)")
+@api_transactions_router.post("/upload", status_code=status.HTTP_200_OK, summary="Carga de archivo pesado (api/transactions)")
+@transactions_router.post("/upload", status_code=status.HTTP_200_OK, summary="Carga de archivo pesado (transactions)")
+@transacciones_router.post("/upload", status_code=status.HTTP_200_OK, summary="Carga de archivo pesado (transacciones)")
+@v1_transacciones_router.post("/upload", status_code=status.HTTP_200_OK, summary="Carga de archivo pesado (api/v1/transacciones)")
 async def upload_transactions_file(
     request: Request,
     file: UploadFile = File(..., description="Archivo pesado en formato .json o .csv"),

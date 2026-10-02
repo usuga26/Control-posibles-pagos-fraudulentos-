@@ -40,10 +40,56 @@ class TransaccionRequest(BaseModel):
 
     model_config = {"populate_by_name": True}
 
-    @field_validator("date")
+    @model_validator(mode="before")
     @classmethod
-    def validate_date_format(cls, v: str) -> str:
-        """Valida que date tenga formato YYYY-MM-DDTHH:MM:SS.mmm exacto."""
+    def normalize_aliases(cls, data: Any) -> Any:
+        """Mapea en O(1) nombres de campos comunes en español, inglés o snake_case."""
+        if isinstance(data, dict):
+            mapping = {
+                "id": "idTxn",
+                "id_txn": "idTxn",
+                "idTransaction": "idTxn",
+                "id_transaccion": "idTxn",
+                "email": "user",
+                "usuario": "user",
+                "client": "user",
+                "cliente": "user",
+                "fecha": "date",
+                "timestamp": "date",
+                "datetime": "date",
+                "valor": "value",
+                "monto": "value",
+                "amount": "value",
+                "payment_method": "paymentMethod",
+                "metodo_pago": "paymentMethod",
+                "metodopago": "paymentMethod",
+                "metodoPago": "paymentMethod",
+                "sha256": "hash",
+                "signature": "hash",
+                "token": "hash",
+            }
+            d = dict(data)
+            for k_old, k_new in mapping.items():
+                if k_old in d and k_new not in d:
+                    d[k_new] = d.pop(k_old)
+            return d
+        return data
+
+    @field_validator("date", mode="before")
+    @classmethod
+    def validate_date_format(cls, v: Any) -> str:
+        """Valida y normaliza date a formato YYYY-MM-DDTHH:MM:SS.mmm."""
+        if not isinstance(v, str):
+            v = str(v)
+        v = v.strip().replace(" ", "T").rstrip("Z")
+        # Si no tiene milisegundos o tiene microsegundos, normalizar a exactamente 3 dígitos
+        if "." not in v:
+            v = f"{v}.000"
+        else:
+            base, ms = v.split(".", 1)
+            ms = (ms + "000")[:3]
+            v = f"{base}.{ms}"
+
         try:
             datetime.strptime(v, "%Y-%m-%dT%H:%M:%S.%f")
         except ValueError as exc:
@@ -51,30 +97,36 @@ class TransaccionRequest(BaseModel):
                 "El campo 'date' debe tener formato YYYY-MM-DDTHH:MM:SS.mmm "
                 "(e.g. 2026-09-23T10:30:01.120)"
             ) from exc
-        # Asegurar exactamente 3 dígitos de milisegundos
-        parts = v.split(".")
-        if len(parts) != 2 or len(parts[1]) != 3:
-            raise ValueError(
-                "El campo 'date' debe tener exactamente 3 dígitos de milisegundos"
-            )
         return v
 
     @field_validator("payment_method", mode="before")
     @classmethod
-    def validate_payment_method(cls, v: str) -> str:
-        """Valida que paymentMethod sea uno de los valores permitidos."""
-        if v not in PAYMENT_METHODS:
+    def validate_payment_method(cls, v: Any) -> str:
+        """Valida y normaliza paymentMethod de forma flexible e insensible a mayúsculas."""
+        if not isinstance(v, str):
+            v = str(v)
+        norm_map = {
+            "tarjeta": "Tarjeta",
+            "pse": "PSE",
+            "transferencia": "Transferencia",
+            "otro": "Otro",
+        }
+        v_clean = norm_map.get(v.strip().lower(), v.strip())
+        if v_clean not in PAYMENT_METHODS:
             raise ValueError(
                 f"paymentMethod debe ser uno de: {', '.join(sorted(PAYMENT_METHODS))}"
             )
-        return v
+        return v_clean
 
-    @field_validator("hash")
+    @field_validator("hash", mode="before")
     @classmethod
-    def validate_hash_format(cls, v: str) -> str:
+    def validate_hash_format(cls, v: Any) -> str:
         """Valida que hash sea hex lowercase de 64 caracteres."""
-        if not all(c in "0123456789abcdef" for c in v):
-            raise ValueError("El hash debe ser hexadecimal en minúsculas")
+        if not isinstance(v, str):
+            v = str(v)
+        v = v.strip().lower()
+        if len(v) != 64 or not all(c in "0123456789abcdef" for c in v):
+            raise ValueError("El hash debe ser hexadecimal en minúsculas de 64 caracteres")
         return v
 
 
