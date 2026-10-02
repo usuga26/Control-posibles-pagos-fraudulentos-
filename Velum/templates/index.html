@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VELUM — Sistema de Detección de Fraude en Tiempo Real</title>
-  <link rel="stylesheet" href="/static/css/styles.css">
+  <link rel="stylesheet" href="../static/css/styles.css">
   <!-- Chart.js servido localmente desde static/vendor/ para funcionamiento 100% offline -->
-  <script src="/static/vendor/chart.umd.js"></script>
+  <script src="../static/vendor/chart.umd.js"></script>
 </head>
 <body>
 
@@ -104,6 +104,18 @@
           <span>Con 2+ anomalías en el periodo</span>
         </div>
       </div>
+
+      <!-- KPI 6: Promedio Transacciones -->
+      <div class="kpi-card green">
+        <div class="kpi-header">
+          <span>Promedio Txns/User</span>
+          <span>📈</span>
+        </div>
+        <div id="kpi-avg-txns" class="kpi-value">0.0</div>
+        <div class="kpi-footer">
+          <span>Transacciones por usuario activo</span>
+        </div>
+      </div>
     </section>
 
     <!-- Sección de Gráficos (2x2 Grid) -->
@@ -133,7 +145,10 @@
           <canvas id="chart-hourly-anomalies"></canvas>
         </div>
       </div>
+    </section>
 
+    <!-- Sección de Gráficos Pequeños (Donas) -->
+    <section class="charts-grid-small">
       <!-- Gráfico 3: Dona (Severidad) -->
       <div class="chart-card">
         <div class="chart-header">
@@ -157,6 +172,19 @@
         </div>
         <div class="chart-body">
           <canvas id="chart-payment-method"></canvas>
+        </div>
+      </div>
+
+      <!-- Gráfico 5: Dona (Estado de Revisión) -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <h3 class="chart-title">Estado de Revisión de Anomalías</h3>
+            <p class="chart-subtitle">Flujo de atención de los casos reportados</p>
+          </div>
+        </div>
+        <div class="chart-body">
+          <canvas id="chart-revision-status"></canvas>
         </div>
       </div>
     </section>
@@ -354,8 +382,8 @@
   </footer>
 
   <!-- Scripts de la aplicación -->
-  <script src="/static/js/dashboard.js"></script>
-  <script src="/static/js/sliding-window.js"></script>
-  <script src="/static/js/simulator.js"></script>
+  <script src="../static/js/dashboard.js"></script>
+  <script src="../static/js/sliding-window.js"></script>
+  <script src="../static/js/simulator.js"></script>
 </body>
 </html>

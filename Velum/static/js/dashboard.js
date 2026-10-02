@@ -10,6 +10,7 @@ let chartTransactions = null;
 let chartHourlyAnomalies = null;
 let chartSeverity = null;
 let chartPayment = null;
+let chartRevision = null;
 
 // Colores según tema
 function getThemeColors() {
@@ -89,6 +90,12 @@ function updateKPIs(data) {
 
   // 5. Usuarios recurrentes
   document.getElementById('kpi-recurring-users').textContent = data.anomalias.recurrentes.toLocaleString();
+
+  // 6. Promedio de transacciones
+  const avgTxnsEl = document.getElementById('kpi-avg-txns');
+  if (avgTxnsEl) {
+    avgTxnsEl.textContent = data.promedio_txns_usuario.toFixed(2);
+  }
 }
 
 function renderCharts(data) {
@@ -235,6 +242,38 @@ function renderCharts(data) {
       cutout: '70%',
     }
   });
+
+  // Gráfico 5: Dona - Estado de Revisión
+  const canvasRevision = document.getElementById('chart-revision-status');
+  if (canvasRevision) {
+    const ctxRevision = canvasRevision.getContext('2d');
+    if (chartRevision) chartRevision.destroy();
+    chartRevision = new Chart(ctxRevision, {
+      type: 'doughnut',
+      data: {
+        labels: ['Nuevas', 'Abiertas', 'Revisadas', 'Descartadas'],
+        datasets: [{
+          data: [
+            data.by_revision.nueva,
+            data.by_revision.abierta,
+            data.by_revision.revisada,
+            data.by_revision.descartada,
+          ],
+          backgroundColor: ['#ef4444', '#f59e0b', '#10b981', '#64748b'],
+          borderWidth: 2,
+          borderColor: colors.cardBg,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { color: colors.text, boxWidth: 12 } }
+        },
+        cutout: '70%',
+      }
+    });
+  }
 }
 
 // 4. Gestión de Tema y Periodo

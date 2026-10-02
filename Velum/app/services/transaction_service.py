@@ -83,9 +83,11 @@ def _parse_client_date(date_str: str) -> datetime:
     
     Elimina la vulnerabilidad de inyección de husos horarios locales.
     """
+    from zoneinfo import ZoneInfo
+    from app.config import settings
     dt_naive = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%f")
-    # Forzar estricto UTC
-    return dt_naive.replace(tzinfo=timezone.utc)
+    # Forzar estricto a la zona horaria de la aplicación (Bogotá) y convertir a UTC
+    return dt_naive.replace(tzinfo=ZoneInfo(settings.timezone)).astimezone(timezone.utc)
 
 
 def _validate_clock_skew(client_dt_utc: datetime, server_dt_utc: datetime) -> None:
@@ -266,12 +268,13 @@ def process_transaction(
             anomaly_info: dict | None = None
 
             if result.anomaly_detected:
+                current_window_seconds = result.window_seconds
                 # Buscar anomalía existente solapada para actualizar
                 existing_anomaly = _find_existing_anomaly(
-                    db, user.id, received_at, settings.window_seconds
+                    db, user.id, received_at, current_window_seconds
                 )
 
-                slot_name, reference = get_time_slot_reference(
+                slot_name, reference, _ = get_time_slot_reference(
                     received_at.astimezone(zoneinfo.ZoneInfo(settings.timezone))
                 )
                 severity_str = calculate_severity(result.transaction_count, reference)
@@ -282,7 +285,7 @@ def process_transaction(
                     existing_anomaly.estado_revision = EstadoRevision.ABIERTA
                     existing_anomaly.descripcion = (
                         f"Ráfaga actualizada: {result.transaction_count} transacciones "
-                        f"en {settings.window_seconds}s para {email_normalized}"
+                        f"en {current_window_seconds}s para {email_normalized}"
                     )
                     db.flush()
                     anomaly_info = {
@@ -292,18 +295,18 @@ def process_transaction(
                     }
                 else:
                     regla = (
-                        f"SLIDING_WINDOW_{settings.window_seconds}s_THRESHOLD_{settings.base_transaction_threshold}"
+                        f"SLIDING_WINDOW_{current_window_seconds}s_THRESHOLD_{settings.base_transaction_threshold}"
                     )
                     anomalia = Anomalia(
                         transaccion_id=txn.id,
                         tipo=TipoAnomalia.POSIBLE_FRAUDE,
                         nivel=NivelAnomalia(severity_str),
                         cantidad_transacciones=result.transaction_count,
-                        ventana_segundos=settings.window_seconds,
+                        ventana_segundos=current_window_seconds,
                         regla_detectada=regla,
                         descripcion=(
                             f"Ráfaga detectada: {result.transaction_count} transacciones "
-                            f"en {settings.window_seconds}s para {email_normalized} "
+                            f"en {current_window_seconds}s para {email_normalized} "
                             f"(franja: {slot_name}, severidad: {severity_str})"
                         ),
                         estado_revision=EstadoRevision.NUEVA,
@@ -340,7 +343,7 @@ def process_transaction(
         type=anomaly_info["type"] if anomaly_info else None,
         severity=anomaly_info["severity"] if anomaly_info else None,
         transactionCount=result.transaction_count if result.anomaly_detected else None,
-        windowSeconds=settings.window_seconds if result.anomaly_detected else None,
+        windowSeconds=result.window_seconds if result.anomaly_detected else None,
     )
 
     logger.info(

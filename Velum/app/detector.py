@@ -34,21 +34,22 @@ class DetectionResult(NamedTuple):
     severity: str | None
     window_start: float | None
     window_end: float | None
+    window_seconds: int
 
 
 # ---------------------------------------------------------------------------
 # Cálculo de severidad
 # ---------------------------------------------------------------------------
 
-def get_time_slot_reference(dt_bogota: datetime) -> tuple[str, int]:
-    """Determina la franja horaria y su referencia de transacciones."""
+def get_time_slot_reference(dt_bogota: datetime) -> tuple[str, int, int]:
+    """Determina la franja horaria, su referencia de transacciones y ventana dinámica."""
     hour = dt_bogota.hour
     if 5 <= hour < 12:
-        return "mañana", settings.ref_morning
+        return "mañana", settings.ref_morning, settings.window_morning
     elif 12 <= hour < 20:
-        return "tarde", settings.ref_afternoon
+        return "tarde", settings.ref_afternoon, settings.window_afternoon
     else:
-        return "noche", settings.ref_night
+        return "noche", settings.ref_night, settings.window_night
 
 
 def calculate_severity(count: int, reference: int) -> str:
@@ -99,9 +100,9 @@ class SlidingWindowDetector:
                     self._windows[user] = deque(maxlen=self.MAX_K)
         return self._user_locks[user]
 
-    def _purge_old(self, user: str, now_epoch: float) -> None:
-        """Elimina timestamps fuera de la ventana [now - window_seconds, now] en O(1) amortizado."""
-        window_start = now_epoch - self.window_seconds
+    def _purge_old(self, user: str, now_epoch: float, current_window_seconds: int) -> None:
+        """Elimina timestamps fuera de la ventana en O(1) amortizado."""
+        window_start = now_epoch - current_window_seconds
         dq = self._windows[user]
         while dq and dq[0] < window_start:
             dq.popleft()
@@ -111,9 +112,19 @@ class SlidingWindowDetector:
         now_epoch = received_at.timestamp()
         
         try:
+            import zoneinfo
+            bogota_tz = zoneinfo.ZoneInfo(settings.timezone)
+        except Exception:
+            from datetime import timezone as tz, timedelta
+            bogota_tz = tz(timedelta(hours=-5))
+
+        dt_bogota = received_at.astimezone(bogota_tz)
+        slot_name, reference, current_window_seconds = get_time_slot_reference(dt_bogota)
+        
+        try:
             lock = self._get_user_lock(user)
             with lock:
-                self._purge_old(user, now_epoch)
+                self._purge_old(user, now_epoch, current_window_seconds)
                 self._windows[user].append(now_epoch)
                 count = len(self._windows[user])
                 window_start_epoch = self._windows[user][0] if self._windows[user] else now_epoch
@@ -127,24 +138,15 @@ class SlidingWindowDetector:
                     severity=None,
                     window_start=None,
                     window_end=None,
+                    window_seconds=current_window_seconds,
                 )
 
-            # Cálculo de severidad
-            try:
-                import zoneinfo
-                bogota_tz = zoneinfo.ZoneInfo(settings.timezone)
-            except Exception:
-                from datetime import timezone as tz, timedelta
-                bogota_tz = tz(timedelta(hours=-5))
-
-            dt_bogota = received_at.astimezone(bogota_tz)
-            _, reference = get_time_slot_reference(dt_bogota)
             severity = calculate_severity(count, reference)
 
             # Observabilidad Avanzada
             logger.warning(
-                "Fraude detectado: User %s, Hora Epoch %f, Nivel %s, Conteo %d", 
-                user, now_epoch, severity, count
+                "Fraude detectado: User %s, Hora Epoch %f, Nivel %s, Conteo %d, Ventana %ds", 
+                user, now_epoch, severity, count, current_window_seconds
             )
 
             return DetectionResult(
@@ -153,6 +155,7 @@ class SlidingWindowDetector:
                 severity=severity,
                 window_start=window_start_epoch,
                 window_end=now_epoch,
+                window_seconds=current_window_seconds,
             )
         except Exception as e:
             logger.error("Error crítico en detector: User %s, Hora Epoch %f, Error: %s", user, now_epoch, str(e))
@@ -161,8 +164,19 @@ class SlidingWindowDetector:
     def rebuild_from_history(self, user: str, timestamps: list[datetime]) -> None:
         """Reconstruye la ventana aplicando límites espaciales O(K)."""
         lock = self._get_user_lock(user)
-        now_epoch = self.clock().timestamp()
-        window_start_epoch = now_epoch - self.window_seconds
+        now = self.clock()
+        now_epoch = now.timestamp()
+        
+        try:
+            import zoneinfo
+            bogota_tz = zoneinfo.ZoneInfo(settings.timezone)
+        except Exception:
+            from datetime import timezone as tz, timedelta
+            bogota_tz = tz(timedelta(hours=-5))
+
+        dt_bogota = now.astimezone(bogota_tz)
+        _, _, current_window_seconds = get_time_slot_reference(dt_bogota)
+        window_start_epoch = now_epoch - current_window_seconds
 
         # Aplicar el límite O(K) de forma estricta cortando los últimos K elementos
         timestamps = timestamps[-self.MAX_K:] if len(timestamps) > self.MAX_K else timestamps

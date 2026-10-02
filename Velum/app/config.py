@@ -45,6 +45,11 @@ class Settings(BaseSettings):
     ref_afternoon: int = 6   # [12:00, 20:00)
     ref_night: int = 3       # [20:00, 05:00)
 
+    # Segundos de la ventana por franja (configurables)
+    window_morning: int = 10
+    window_afternoon: int = 6
+    window_night: int = 3
+
     @property
     def cors_origins_list(self) -> list[str]:
         """Retorna CORS_ORIGINS como lista."""

@@ -211,7 +211,8 @@ async function simulateAttack() {
           );
         }
       } else {
-        logSimMessage(`❌ Error en Token ${i}: HTTP ${res.status}`, 'rejected');
+        const errorMsg = res.data?.error?.message || `HTTP ${res.status}`;
+        logSimMessage(`❌ Error en Token ${i}: ${errorMsg}`, 'rejected');
       }
 
       // Pausa breve entre tokens para simular ráfaga real < 1.5s total
@@ -259,7 +260,8 @@ async function simulateNormalTraffic() {
           'approved'
         );
       } else {
-        logSimMessage(`Error en Txn ${i}: HTTP ${res.status}`, 'rejected');
+        const errorMsg = res.data?.error?.message || `HTTP ${res.status}`;
+        logSimMessage(`❌ Error en Txn ${i}: ${errorMsg}`, 'rejected');
       }
 
       if (i === 1) {

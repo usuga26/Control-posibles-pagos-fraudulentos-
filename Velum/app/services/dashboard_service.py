@@ -198,6 +198,9 @@ def get_dashboard_stats(db: Session, periodo: str) -> DashboardStatsResponse:
         otro=pago_counts.get("Otro", 0),
     )
 
+    usuarios_unicos_count = len(set(txn_to_user.values()))
+    promedio_txns = round(total / usuarios_unicos_count, 2) if usuarios_unicos_count > 0 else 0.0
+
     return DashboardStatsResponse(
         periodo=periodo,
         by_status=ByStatusStats(
@@ -219,6 +222,7 @@ def get_dashboard_stats(db: Session, periodo: str) -> DashboardStatsResponse:
         pico_hora=pico_hora,
         tendencia=tendencia,
         by_payment_method=by_payment_method,
+        promedio_txns_usuario=promedio_txns,
     )
 
 

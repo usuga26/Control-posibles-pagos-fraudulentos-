@@ -173,6 +173,7 @@ class DashboardStatsResponse(BaseModel):
     pico_hora: int | None = None
     tendencia: float | None = None
     by_payment_method: PaymentMethodStats
+    promedio_txns_usuario: float = 0.0
 
 
 # ---------------------------------------------------------------------------
