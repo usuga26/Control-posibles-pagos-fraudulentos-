@@ -359,6 +359,64 @@ async function resetSimulation() {
   }
 }
 
+// 9. Carga de archivo masivo / pesado (.json / .csv)
+async function handleHeavyFileUpload(e) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  const btnUpload = document.getElementById('btn-upload-file');
+  const statusLabel = document.getElementById('upload-status-label');
+  const originalBtnText = btnUpload ? btnUpload.textContent : '';
+
+  if (btnUpload) {
+    btnUpload.disabled = true;
+    btnUpload.textContent = '⏳ Inyectando dataset masivo...';
+  }
+  if (statusLabel) {
+    statusLabel.textContent = `Procesando ${file.name} (${(file.size / (1024 * 1024)).toFixed(2)} MB)...`;
+  }
+
+  logSimMessage(`Iniciando ingestión de archivo pesado: ${file.name} [${(file.size / 1024).toFixed(1)} KB]...`, 'info');
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const res = await fetch('/api/v1/transactions/upload?ignore_clock_skew=true', {
+      method: 'POST',
+      body: formData,
+    });
+    const result = await res.json();
+
+    if (res.ok && result.success) {
+      logSimMessage(
+        `🎉 DATASET PROCESADO: ${result.total_processed} txns en ${result.elapsed_seconds}s (${result.throughput_txns_per_sec} txn/s) | Aprobadas: ${result.approved}, Sospechosas: ${result.suspicious}, Anomalías: ${result.anomalies_detected}`,
+        'approved'
+      );
+      if (statusLabel) {
+        statusLabel.textContent = `✅ ${result.total_processed} txns procesadas en ${result.elapsed_seconds}s (${result.throughput_txns_per_sec} txn/s)`;
+      }
+      alert(`Carga completada con éxito:\n\n• Total: ${result.total_processed} transacciones\n• Aprobadas: ${result.approved}\n• Sospechosas: ${result.suspicious}\n• Anomalías detectadas: ${result.anomalies_detected}\n• Tiempo total: ${result.elapsed_seconds}s (${result.throughput_txns_per_sec} txns/seg)`);
+      if (window.refreshDashboard) window.refreshDashboard();
+      if (window.refreshSlidingWindow) window.refreshSlidingWindow();
+      if (window.loadUsersHistory) window.loadUsersHistory();
+    } else {
+      const err = result.error?.message || `HTTP ${res.status}`;
+      logSimMessage(`❌ Error al procesar archivo: ${err}`, 'rejected');
+      if (statusLabel) statusLabel.textContent = `Error: ${err}`;
+    }
+  } catch (err) {
+    logSimMessage(`Error de conexión cargando archivo: ${err.message}`, 'rejected');
+    if (statusLabel) statusLabel.textContent = `Error de red: ${err.message}`;
+  } finally {
+    if (btnUpload) {
+      btnUpload.disabled = false;
+      btnUpload.textContent = originalBtnText || '📤 Cargar Dataset Pesado del Profesor';
+    }
+    e.target.value = '';
+  }
+}
+
 // Inicialización de eventos del simulador
 document.addEventListener('DOMContentLoaded', () => {
   const btnAttack = document.getElementById('btn-sim-attack');
@@ -372,6 +430,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const btnReset = document.getElementById('btn-reset-sim');
   if (btnReset) btnReset.addEventListener('click', resetSimulation);
+
+  const inputHeavy = document.getElementById('input-heavy-file');
+  if (inputHeavy) inputHeavy.addEventListener('change', handleHeavyFileUpload);
 
   // Estado inicial del visualizador
   resetTokenVisualizer();

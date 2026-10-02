@@ -21,6 +21,7 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.base import BaseHTTPMiddleware
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from app.config import settings
 from app.database import SessionLocal
@@ -97,9 +98,9 @@ async def lifespan(app: FastAPI):
 
 
 class PayloadLimitMiddleware(BaseHTTPMiddleware):
-    """Middleware para limitar el tamaño del payload a 1 MB y prevenir ataques DoS."""
+    """Middleware para limitar el tamaño del payload a 100 MB y soportar cargas masivas."""
 
-    MAX_PAYLOAD_SIZE = 1024 * 1024  # 1 MB
+    MAX_PAYLOAD_SIZE = 100 * 1024 * 1024  # 100 MB para archivos pesados y lotes
 
     async def dispatch(self, request: Request, call_next):
         content_length = request.headers.get("content-length")
@@ -110,7 +111,7 @@ class PayloadLimitMiddleware(BaseHTTPMiddleware):
                     "success": False,
                     "error": {
                         "code": "PAYLOAD_TOO_LARGE",
-                        "message": "El cuerpo de la solicitud supera el tamaño máximo permitido (1MB)",
+                        "message": "El cuerpo de la solicitud supera el tamaño máximo permitido (100MB)",
                     },
                 },
             )
@@ -127,13 +128,22 @@ app = FastAPI(
 )
 
 # Middlewares
+# 1. Confianza en cabeceras de proxy inverso (X-Forwarded-For) para Ngrok y túneles
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
+
+# 2. Límite de tamaño de payload
 app.add_middleware(PayloadLimitMiddleware)
+
+# 3. CORS preparado para Ngrok y llamadas externas:
+# Admite localhost y cualquier subdominio dinámico (*.ngrok-free.app, *.tunnelmole.net)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,
+    allow_origin_regex=r"^https?://.*",
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "OPTIONS", "PUT", "DELETE"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 
@@ -197,13 +207,17 @@ app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 # Rutas base
 @app.get("/health", tags=["system"], summary="Verificación de estado del servicio")
-def health_check():
-    """Retorna estado operativo y métricas básicas de salud."""
+def health_check(request: Request):
+    """Retorna estado operativo y métricas básicas de salud, incluyendo IP detectada."""
+    client_ip = request.headers.get("x-forwarded-for") or (
+        request.client.host if request.client else "unknown"
+    )
     return {
         "status": "operativo",
         "service": "VELUM",
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "environment": settings.environment,
+        "client_ip": client_ip,
     }
 
 
@@ -215,5 +229,6 @@ def render_dashboard(request: Request):
 
 # Incluir routers de la API
 app.include_router(transactions.router)
+app.include_router(transactions.v1_router)  # Alias /api/v1/transactions
 app.include_router(dashboard.router)
 app.include_router(simulator.router)

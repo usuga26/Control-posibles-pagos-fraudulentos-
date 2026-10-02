@@ -159,6 +159,7 @@ def process_transaction(
     db: Session,
     payload: TransaccionRequest,
     received_at: datetime | None = None,
+    ignore_clock_skew: bool = False,
 ) -> TransaccionResponse:
     """Procesa una transacción entrante siguiendo el flujo completo de VELUM.
 
@@ -166,6 +167,7 @@ def process_transaction(
         db: Sesión de base de datos.
         payload: Datos de la transacción validados por Pydantic.
         received_at: Timestamp de recepción (UTC). Si None, usa datetime.now(UTC).
+        ignore_clock_skew: Si True, permite datasets históricos o archivos masivos.
 
     Returns:
         TransaccionResponse con el resultado completo.
@@ -176,12 +178,14 @@ def process_transaction(
         UserBlockedError: Usuario bloqueado o inactivo.
         ConflictTransactionError: Mismo idTxn con contenido diferente.
     """
-    if received_at is None:
-        received_at = datetime.now(timezone.utc)
-
     # 1. Parsear y validar fecha del cliente
     client_dt_utc = _parse_client_date(payload.date)
-    _validate_clock_skew(client_dt_utc, received_at)
+
+    if received_at is None:
+        received_at = client_dt_utc if ignore_clock_skew else datetime.now(timezone.utc)
+
+    if not ignore_clock_skew:
+        _validate_clock_skew(client_dt_utc, received_at)
 
     # 2. Recalcular hash y comparar
     expected_hash = compute_hash(

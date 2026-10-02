@@ -349,6 +349,17 @@
           <button id="btn-run-autotest" class="sim-action-btn btn-test">
             🧪 Ejecutar autotest de Hash (WebCrypto)
           </button>
+          
+          <!-- Carga de Archivo Pesado (.json / .csv) -->
+          <div style="border: 1px dashed var(--border-color, #4b5563); border-radius: 8px; padding: 10px; text-align: center; background: rgba(99, 102, 241, 0.05); margin: 4px 0;">
+            <div style="font-size: 12px; font-weight: 600; margin-bottom: 6px;">📂 Ingesta de Archivo Pesado (.json / .csv)</div>
+            <input type="file" id="input-heavy-file" accept=".json,.csv" style="display: none;" />
+            <button id="btn-upload-file" type="button" class="sim-action-btn" style="background: #4f46e5; color: white;" onclick="document.getElementById('input-heavy-file').click();">
+              📤 Cargar Dataset Pesado del Profesor
+            </button>
+            <div id="upload-status-label" style="font-size: 11px; color: var(--text-muted, #9ca3af); margin-top: 4px;">Soporta hasta 100 MB (.json / .csv)</div>
+          </div>
+
           <button id="btn-reset-sim" class="sim-action-btn btn-reset">
             🧹 Restablecer datos de simulación
           </button>

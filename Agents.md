@@ -10,16 +10,12 @@ El sistema es un motor de análisis heurístico y control de saturación[cite: 1
 - **Complejidad Espacial Acotada O(K):** El uso de memoria en las colas no crecerá infinitamente. La complejidad espacial está estrictamente limitada al tamaño de la ventana activa ($K$), garantizando la purga inmediata de cualquier transacción que expire los límites de la franja de tiempo[cite: 21, 22].
 
 ## 3. ARQUITECTURA EN CAPAS Y FLUJO UNIDIRECCIONAL
-Respeta estrictamente la regla de dependencia y flujo unidireccional: `routers -> services -> db/repositories`[cite: 13, 22].
+Respeta estrictamente la regla de dependencia y flujo unidireccional: `routers -> services`[cite: 13, 22].
 - **Routers:** Capa de transporte exclusiva. Solo reciben peticiones JSON, validan esquemas DTO mediante Pydantic y traducen las excepciones de dominio a respuestas HTTP estandarizadas (ej. 201 Created, 202 Accepted, 400 Bad Request, 409 Conflict)[cite: 19, 23]. No ejecutan lógica.
 - **Services:** Concentran el núcleo algorítmico matemático puro y orquestan el flujo de negocio[cite: 23, 24]. No conocen objetos HTTP, no reciben objetos `Request`, ni ejecutan comandos SQL directos[cite: 22, 24].
-- **Repositories:** Centralizan toda la lógica de persistencia y consultas SQL usando SQLAlchemy 2.0[cite: 23, 24]. Están prohibidas las consultas dentro de ciclos (Problema N+1); se exige el uso de operaciones vectorizadas y carga ansiosa (`selectinload`, `joinedload`) para garantizar tiempos $O(\log N)$ respaldados por índices B-Tree[cite: 22, 24].
 
-## 4. BLINDAJE DE SEGURIDAD (UNIX EPOCH & RLS)
-- **Vulnerabilidad de Reloj Local:** Todos los cálculos de tiempo (deltas) para la ventana temporal deben realizarse usando tiempo absoluto en `datetime.now(timezone.utc).timestamp()` (UNIX Epoch)[cite: 15, 17]. Está absolutamente prohibido usar la hora local del cliente o depender de inyecciones de `timedelta` que expongan al servidor a manipulaciones de reloj o evasiones de ventana[cite: 13, 17].
-- **Aislamiento Multi-Tenant:** TODAS las consultas a repositorios de persistencia deben incluir forzosamente la cláusula de seguridad `WHERE tenant_id = :tenant_id`[cite: 14, 22]. El aislamiento se reforzará con las políticas *Row Level Security* (RLS) en PostgreSQL, garantizando que ninguna filtración cruce fronteras B2B[cite: 22, 30].
 
-## 5. REGLA DE EJECUCIÓN (PASO 0)
+## 4. REGLA DE EJECUCIÓN (PASO 0)
 Antes de escribir cualquier línea de código, modificar un archivo o ejecutar una refactorización, el agente DEBE detenerse y emitir un reporte listando:
 1. Las ineficiencias encontradas respecto a las reglas anteriores.
 2. La justificación técnica y precisión de la complejidad Big O de su propuesta de corrección.
