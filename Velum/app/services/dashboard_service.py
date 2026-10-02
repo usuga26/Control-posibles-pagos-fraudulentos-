@@ -111,14 +111,14 @@ def get_dashboard_stats(db: Session, periodo: str) -> DashboardStatsResponse:
         t.usuario_id for t in txns if t.estado == EstadoTransaccion.SOSPECHOSA
     )
 
-    # Usuarios recurrentes: 2+ anomalías en el periodo
+    # Usuarios recurrentes: 2+ anomalías en el periodo (Eliminación de N+1)
     usuario_anomalia_count: dict[int, int] = {}
+    txn_to_user = {t.id: t.usuario_id for t in txns}
+    
     for a in anomalias_periodo:
-        txn_obj = db.get(Transaccion, a.transaccion_id)
-        if txn_obj:
-            usuario_anomalia_count[txn_obj.usuario_id] = (
-                usuario_anomalia_count.get(txn_obj.usuario_id, 0) + 1
-            )
+        u_id = txn_to_user.get(a.transaccion_id)
+        if u_id:
+            usuario_anomalia_count[u_id] = usuario_anomalia_count.get(u_id, 0) + 1
     recurrentes = sum(1 for c in usuario_anomalia_count.values() if c >= 2)
 
     # Por severidad
@@ -223,44 +223,52 @@ def get_dashboard_stats(db: Session, periodo: str) -> DashboardStatsResponse:
 
 
 def get_timeline(db: Session, usuario_id: int) -> TimelineResponse:
-    """Construye la línea de tiempo de ventana deslizante para un usuario."""
+    """Construye la línea de tiempo de ventana deslizante para un usuario.
+    
+    Optimizado a O(N) de complejidad temporal mediante patrón Two Pointers.
+    Consultas N+1 eliminadas usando carga ansiosa (selectinload).
+    """
+    from sqlalchemy.orm import selectinload
+    
     usuario = db.get(Usuario, usuario_id)
     if usuario is None:
         return None  # type: ignore[return-value]
 
+    # Carga Ansiosa de anomalías para eliminar el N+1
     txns = (
         db.query(Transaccion)
+        .options(selectinload(Transaccion.anomalias))
         .filter(Transaccion.usuario_id == usuario_id)
-        .order_by(Transaccion.fecha_recepcion)
+        .order_by(Transaccion.fecha_recepcion.asc())
         .all()
     )
 
-    # Para cada transacción, calcular retrospectivamente si estuvo en ventana
     entries: list[TimelineEntry] = []
     window_seconds = settings.window_seconds
 
-    for i, txn in enumerate(txns):
+    left = 0
+    for right, txn in enumerate(txns):
         t = txn.fecha_recepcion
         if t.tzinfo is None:
             t = t.replace(tzinfo=timezone.utc)
+            
+        t_epoch = t.timestamp()
+        
+        # Avanzar el puntero izquierdo si está fuera de la ventana (Two Pointers)
+        while left <= right:
+            left_t = txns[left].fecha_recepcion
+            if left_t.tzinfo is None:
+                left_t = left_t.replace(tzinfo=timezone.utc)
+            if left_t.timestamp() < t_epoch - window_seconds:
+                left += 1
+            else:
+                break
+                
+        count = right - left + 1
         window_start = t - timedelta(seconds=window_seconds)
 
-        # Transacciones en la ventana hasta este punto (inclusive)
-        in_window = []
-        for other in txns[:i + 1]:
-            other_t = other.fecha_recepcion
-            if other_t.tzinfo is None:
-                other_t = other_t.replace(tzinfo=timezone.utc)
-            if window_start <= other_t <= t:
-                in_window.append(other)
-        count = len(in_window)
-
-        # Anomalías asociadas a esta transacción
-        anomalias_txn = (
-            db.query(Anomalia)
-            .filter(Anomalia.transaccion_id == txn.id)
-            .all()
-        )
+        # Utilizar carga ansiosa ya precargada
+        anomalias_txn = txn.anomalias
         severidad = anomalias_txn[0].nivel.value if anomalias_txn else None
         regla = anomalias_txn[0].regla_detectada if anomalias_txn else None
 
@@ -287,8 +295,20 @@ def get_timeline(db: Session, usuario_id: int) -> TimelineResponse:
 
 
 def get_users_directory(db: Session, periodo: str = "todos") -> list[dict]:
-    """Retorna el listado de usuarios con metricas adaptadas al periodo seleccionado."""
-    usuarios = db.query(Usuario).order_by(Usuario.id).all()
+    """Retorna el listado de usuarios con metricas adaptadas al periodo seleccionado.
+    
+    Refactorizado con carga ansiosa (selectinload) para eliminar N+1 masivos.
+    """
+    from sqlalchemy.orm import selectinload
+    
+    usuarios = (
+        db.query(Usuario)
+        .options(
+            selectinload(Usuario.transacciones).selectinload(Transaccion.anomalias)
+        )
+        .order_by(Usuario.id)
+        .all()
+    )
     
     start_naive = None
     end_naive = None
@@ -313,12 +333,8 @@ def get_users_directory(db: Session, periodo: str = "todos") -> list[dict]:
         total_txns = len(txns)
         total_monto = sum(t.valor for t in txns) if txns else Decimal("0.00")
         
-        # Conteo de anomalias en el periodo
-        txn_ids = [t.id for t in txns]
-        anomalias_count = (
-            db.query(Anomalia).filter(Anomalia.transaccion_id.in_(txn_ids)).count()
-            if txn_ids else 0
-        )
+        # Conteo de anomalias en el periodo operando en memoria (O(N) sin queries)
+        anomalias_count = sum(len(t.anomalias) for t in txns)
         
         # Calcular nivel de riesgo segun actividad
         if u.estado.value == "BLOQUEADO":

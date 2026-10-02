@@ -79,20 +79,21 @@ class ConflictTransactionError(Exception):
 # ---------------------------------------------------------------------------
 
 def _parse_client_date(date_str: str) -> datetime:
-    """Parsea fecha del cliente asumiendo zona America/Bogota (UTC-5).
-
-    Si date llega sin zona horaria, se asume America/Bogota.
-    Retorna datetime con tzinfo UTC.
+    """Parsea fecha del cliente asumiendo ISO8601 estricto (UTC).
+    
+    Elimina la vulnerabilidad de inyección de husos horarios locales.
     """
     dt_naive = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%f")
-    bogota_offset = timedelta(hours=-5)
-    dt_bogota = dt_naive.replace(tzinfo=timezone(bogota_offset))
-    return dt_bogota.astimezone(timezone.utc)
+    # Forzar estricto UTC
+    return dt_naive.replace(tzinfo=timezone.utc)
 
 
 def _validate_clock_skew(client_dt_utc: datetime, server_dt_utc: datetime) -> None:
-    """Rechaza si la diferencia entre cliente y servidor supera MAX_CLOCK_SKEW_SECONDS."""
-    diff = abs((server_dt_utc - client_dt_utc).total_seconds())
+    """Rechaza si la diferencia entre cliente y servidor supera MAX_CLOCK_SKEW_SECONDS.
+    
+    Validación de tiempo O(1) usando operaciones flotantes UNIX Epoch absolutas.
+    """
+    diff = abs(server_dt_utc.timestamp() - client_dt_utc.timestamp())
     if diff > settings.max_clock_skew_seconds:
         raise ClockSkewError(
             f"Diferencia de reloj {diff:.0f}s supera el máximo permitido "
@@ -142,7 +143,7 @@ def _find_existing_anomaly(
         if received_at.tzinfo is None:
             received_at = received_at.replace(tzinfo=timezone.utc)
 
-        diff = abs((received_at - t_cand).total_seconds())
+        diff = abs(received_at.timestamp() - t_cand.timestamp())
         if diff <= window_seconds:
             return candidate
     return None
@@ -215,7 +216,10 @@ def process_transaction(
 
         # 5. Verificar estado del usuario
         if user.estado in (EstadoUsuario.BLOQUEADO, EstadoUsuario.INACTIVO):
-            logger.warning("Transacción rechazada: usuario=%s estado=%s", email_normalized, user.estado)
+            logger.warning(
+                "Fraude/Bloqueo detectado: User %s, Hora Epoch %f", 
+                email_normalized, received_at.timestamp()
+            )
             txn = Transaccion(
                 id_txn=payload.id_txn,
                 usuario_id=user.id,
@@ -231,7 +235,14 @@ def process_transaction(
             raise UserBlockedError(user.estado.value)
 
         # 6. Pasar por el detector de ventana deslizante
-        result = detector.process(email_normalized, received_at)
+        try:
+            result = detector.process(email_normalized, received_at)
+        except Exception as e:
+            logger.error(
+                "Fallo en motor de fraude: User %s, Hora Epoch %f, Error: %s",
+                email_normalized, received_at.timestamp(), str(e)
+            )
+            raise
 
         # 7. Determinar estado de la transacción
         estado = EstadoTransaccion.SOSPECHOSA if result.anomaly_detected else EstadoTransaccion.APROBADA
