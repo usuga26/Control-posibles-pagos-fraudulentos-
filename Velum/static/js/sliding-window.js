@@ -22,6 +22,7 @@ async function resolveUserId(email) {
 }
 
 async function loadUserTimeline(email = activeUserEmail) {
+  if (!email) return;
   activeUserEmail = email;
   const trackEl = document.getElementById('timeline-track');
   const userDisplayEl = document.getElementById('active-user-display');
@@ -29,33 +30,35 @@ async function loadUserTimeline(email = activeUserEmail) {
 
   // Actualizar botones de selección rápida
   document.querySelectorAll('.user-quick-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.getAttribute('data-email') === email);
+    btn.classList.toggle('active', btn.getAttribute('data-email').toLowerCase() === email.toLowerCase());
   });
 
-  const userId = await resolveUserId(email);
-  if (!userId) {
-    trackEl.innerHTML = `
-      <div style="margin: auto; color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">
-        Sin transacciones registradas para <strong>${email}</strong>.<br>
-        Usa el simulador inferior para generar tráfico o un ataque.
-      </div>
-    `;
-    return;
-  }
-
-  activeUserId = userId;
-
   try {
-    const res = await fetch(`/api/dashboard/timeline-sliding-window/${userId}`);
+    const res = await fetch(`/api/dashboard/timeline-sliding-window/${encodeURIComponent(email)}`);
     if (!res.ok) {
       if (res.status === 404) {
-        trackEl.innerHTML = `<div style="margin: auto; color: var(--text-muted);">Sin historial para este usuario.</div>`;
+        trackEl.innerHTML = `
+          <div style="margin: auto; color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">
+            Sin transacciones registradas para <strong>${email}</strong>.<br>
+            Usa el simulador inferior para generar tráfico o un ataque.
+          </div>
+        `;
         return;
       }
       throw new Error('Error al cargar timeline');
     }
 
     const data = await res.json();
+    if (!data.entries || data.entries.length === 0) {
+      trackEl.innerHTML = `
+        <div style="margin: auto; color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">
+          Sin transacciones registradas para <strong>${email}</strong>.<br>
+          Usa el simulador inferior para generar tráfico o un ataque.
+        </div>
+      `;
+      return;
+    }
+
     renderTimelineNodes(data.entries, trackEl);
   } catch (err) {
     console.error('Error cargando timeline de ventana deslizante:', err);
@@ -130,19 +133,62 @@ function renderTimelineNodes(entries, container) {
 }
 
 // Inicialización de controles del timeline
-function initSlidingWindowControls() {
+async function initSlidingWindowControls() {
+  const container = document.querySelector('.user-selector-group');
+  if (!container) return;
+
+  // Las 3 cuentas base académicas obligatorias siempre presentes
+  const baseUsers = [
+    { email: 'b@b.com', label: 'b@b.com (Ataque)' },
+    { email: 'c@c.com', label: 'c@c.com (Normal)' },
+    { email: 'aa@aa.com', label: 'aa@aa.com' },
+  ];
+
+  let displayUsers = [...baseUsers];
+
+  try {
+    const res = await fetch('/api/simulator/users');
+    if (res.ok) {
+      const data = await res.json();
+      const users = data.users || [];
+      users.forEach(u => {
+        if (!displayUsers.some(b => b.email.toLowerCase() === u.email.toLowerCase())) {
+          displayUsers.push({ email: u.email, label: u.email });
+        }
+      });
+    }
+  } catch (e) {
+    console.error('Error cargando lista de usuarios para timeline:', e);
+  }
+
+  let btnsHtml = `<span style="font-size: 13px; color: var(--text-secondary); margin-right: 6px;">Usuario activo:</span>`;
+  displayUsers.forEach(u => {
+    const isAct = u.email.toLowerCase() === activeUserEmail.toLowerCase() ? 'active' : '';
+    btnsHtml += `<button class="user-quick-btn ${isAct}" data-email="${u.email}">${u.label}</button> `;
+  });
+  container.innerHTML = btnsHtml;
+
   document.querySelectorAll('.user-quick-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.onclick = () => {
       const email = btn.getAttribute('data-email');
       loadUserTimeline(email);
-    });
+    };
   });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   initSlidingWindowControls();
-  // Cargar visualizador tras breve espera para dar tiempo a la inicialización del dashboard
-  setTimeout(() => loadUserTimeline('b@b.com'), 400);
+  setTimeout(() => loadUserTimeline(activeUserEmail), 500);
+
+  // Auto-refresco del timeline cada 3 segundos
+  setInterval(() => {
+    if (activeUserEmail) {
+      loadUserTimeline(activeUserEmail);
+    }
+  }, 3000);
 });
 
 window.refreshSlidingWindow = () => loadUserTimeline(activeUserEmail);
+window.loadTimeline = (userId, email) => {
+  loadUserTimeline(email);
+};

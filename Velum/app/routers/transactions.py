@@ -19,6 +19,7 @@ from typing import Union
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile, status
 from fastapi.responses import JSONResponse
+from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -121,13 +122,19 @@ def process_batch_internal(
 
 
 @router.post("", status_code=status.HTTP_201_CREATED, summary="Crear o validar transacción")
+@router.post("/", status_code=status.HTTP_201_CREATED, include_in_schema=False)
 @v1_router.post("", status_code=status.HTTP_201_CREATED, summary="Crear o validar transacción (v1)")
+@v1_router.post("/", status_code=status.HTTP_201_CREATED, include_in_schema=False)
 @api_transactions_router.post("", status_code=status.HTTP_201_CREATED, summary="Crear o validar transacción (api/transactions)")
+@api_transactions_router.post("/", status_code=status.HTTP_201_CREATED, include_in_schema=False)
 @transactions_router.post("", status_code=status.HTTP_201_CREATED, summary="Crear o validar transacción (transactions)")
+@transactions_router.post("/", status_code=status.HTTP_201_CREATED, include_in_schema=False)
 @transacciones_router.post("", status_code=status.HTTP_201_CREATED, summary="Crear o validar transacción (transacciones)")
+@transacciones_router.post("/", status_code=status.HTTP_201_CREATED, include_in_schema=False)
 @v1_transacciones_router.post("", status_code=status.HTTP_201_CREATED, summary="Crear o validar transacción (api/v1/transacciones)")
+@v1_transacciones_router.post("/", status_code=status.HTTP_201_CREATED, include_in_schema=False)
 def create_transaction(
-    payload: Union[TransaccionRequest, list[TransaccionRequest]],
+    payload: Union[list[dict], dict, TransaccionRequest, list[TransaccionRequest]],
     request: Request,
     db: Session = Depends(get_db),
 ):
@@ -144,15 +151,31 @@ def create_transaction(
         )
         return process_batch_internal(payload, db, ignore_clock_skew=True)
 
+    try:
+        if isinstance(payload, dict):
+            req = TransaccionRequest.model_validate(payload)
+        else:
+            req = payload
+    except ValidationError as val_err:
+        errors = val_err.errors()
+        first_error = errors[0] if errors else {}
+        msg = first_error.get("msg", "Error de validación")
+        loc = ".".join(str(l) for l in first_error.get("loc", []))
+        field_msg = f"{loc}: {msg}" if loc else msg
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={"success": False, "error": {"code": "VALIDATION_ERROR", "message": field_msg}},
+        )
+
     logger.info(
         "Transacción recibida [IP: %s]: idTxn=%s user=%s",
         client_ip,
-        payload.id_txn,
-        payload.user,
+        req.id_txn,
+        req.user,
     )
 
     try:
-        response = process_transaction(db, payload)
+        response = process_transaction(db, req, ignore_clock_skew=True)
         return response
 
     except DuplicateTransactionError as exc:
@@ -247,6 +270,8 @@ def list_transactions(
     txns = query.limit(limit).all()
     results = []
     for t in txns:
+        anom = t.anomalias[0] if t.anomalias else None
+        is_fraud = (anom is not None) or (t.estado.value == "SOSPECHOSA")
         results.append({
             "id": t.id,
             "idTxn": t.id_txn,
@@ -256,6 +281,10 @@ def list_transactions(
             "paymentMethod": t.metodo_pago,
             "status": t.estado.value,
             "hash": t.hash,
+            "isAnomaly": is_fraud,
+            "severity": anom.nivel.value if anom else ("ALTO" if is_fraud else None),
+            "burst": f"{anom.cantidad_transacciones} txns en {anom.ventana_segundos}s" if anom else ("Ráfaga en ventana" if is_fraud else None),
+            "rule": anom.regla_detectada if anom else None,
         })
     return {
         "success": True,

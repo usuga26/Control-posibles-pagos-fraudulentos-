@@ -75,6 +75,9 @@ def compute_hash(
     return digest
 
 
+calculate_canonical_hash = compute_hash
+
+
 def load_test_vectors() -> list[dict]:
     """Carga los vectores de prueba desde tests/hash_vectors.json."""
     with HASH_VECTORS_PATH.open("r", encoding="utf-8") as f:

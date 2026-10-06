@@ -205,6 +205,12 @@ class SlidingWindowDetector:
             if user in self._windows:
                 self._windows[user].clear()
 
+    def reset_all(self) -> None:
+        """Limpia todas las ventanas de todos los usuarios en memoria."""
+        with self._global_lock:
+            self._windows.clear()
+            self._user_locks.clear()
+
 # Instancia global del detector (singleton)
 detector = SlidingWindowDetector()
 

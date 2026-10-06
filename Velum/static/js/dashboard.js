@@ -3,7 +3,7 @@
  * Gestiona el consumo de métricas, los 5 KPI y la renderización de 4 gráficos con Chart.js local.
  */
 
-let currentPeriod = 'hoy';
+let currentPeriod = localStorage.getItem('velum_period') || 'todo';
 let currentTheme = localStorage.getItem('velum_theme') || 'dark';
 
 let chartTransactions = null;
@@ -295,11 +295,17 @@ function initTheme() {
 function initPeriodSelector() {
   const buttons = document.querySelectorAll('.period-btn');
   buttons.forEach(btn => {
+    if (btn.getAttribute('data-period') === currentPeriod) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
     btn.addEventListener('click', () => {
       buttons.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       const p = btn.getAttribute('data-period');
       currentPeriod = p;
+      localStorage.setItem('velum_period', p);
       fetchDashboardStats(p);
       loadUsersHistory();
     });
@@ -331,7 +337,7 @@ function renderUsersTable(users, highlightEmail = null) {
   if (!tbody) return;
 
   if (countEl) {
-    const pLabel = currentPeriod === 'hoy' ? 'HOY' : (currentPeriod === 'semana' ? 'ÚLTIMOS 7 DÍAS' : 'ÚLTIMOS 30 DÍAS');
+    const pLabel = currentPeriod === 'hoy' ? 'HOY' : (currentPeriod === 'semana' ? 'ÚLTIMOS 7 DÍAS' : (currentPeriod === 'mes' ? 'ÚLTIMOS 30 DÍAS' : 'HISTÓRICO COMPLETO'));
     countEl.innerHTML = `<strong>${users.length}</strong> usuarios monitoreados · Métricas del periodo: <span style="color:#38bdf8; font-weight:700;">${pLabel}</span>`;
   }
 
@@ -409,21 +415,201 @@ window.inspectUserWindow = (userId, email) => {
   }
 };
 
+// 6. Sincronización en vivo del Terminal y Tabla de Auditoría
+let seenTxnIds = new Set();
+let cachedLiveTxns = [];
+let currentTxFilter = 'all';
+let currentTxSearch = '';
+
+function initTxFilters() {
+  document.querySelectorAll('[data-tx-filter]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-tx-filter]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentTxFilter = btn.getAttribute('data-tx-filter');
+      renderLiveTxnsTable();
+    });
+  });
+
+  const searchInput = document.getElementById('live-txns-search');
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      currentTxSearch = e.target.value.trim();
+      renderLiveTxnsTable();
+    });
+  }
+}
+
+function renderLiveTxnsTable() {
+  const tbody = document.getElementById('live-txns-tbody');
+  const subtitle = document.getElementById('live-txns-subtitle');
+  if (!tbody) return;
+
+  const totalFrauds = cachedLiveTxns.filter(t => t.isAnomaly || t.status === 'SOSPECHOSA').length;
+  const totalApproved = cachedLiveTxns.filter(t => t.status === 'APROBADA').length;
+
+  const btnAll = document.getElementById('btn-tx-all');
+  const btnFraud = document.getElementById('btn-tx-fraud');
+  const btnApp = document.getElementById('btn-tx-approved');
+  if (btnAll) btnAll.textContent = `Todas (${cachedLiveTxns.length})`;
+  if (btnFraud) btnFraud.textContent = `🚨 Solo Fraude (${totalFrauds})`;
+  if (btnApp) btnApp.textContent = `✅ Aprobadas (${totalApproved})`;
+
+  let filtered = cachedLiveTxns.filter(t => {
+    const isFraud = t.isAnomaly || t.status === 'SOSPECHOSA';
+    if (currentTxFilter === 'fraud' && !isFraud) return false;
+    if (currentTxFilter === 'approved' && isFraud) return false;
+    if (currentTxSearch) {
+      const q = currentTxSearch.toLowerCase();
+      return (t.idTxn && t.idTxn.toLowerCase().includes(q)) || 
+             (t.user && t.user.toLowerCase().includes(q)) || 
+             (t.paymentMethod && t.paymentMethod.toLowerCase().includes(q));
+    }
+    return true;
+  });
+
+  if (subtitle) {
+    subtitle.innerHTML = `Mostrando <strong>${filtered.length}</strong> de <strong>${cachedLiveTxns.length}</strong> transacciones procesadas · 🚨 <span style="color:#f87171; font-weight:700;">${totalFrauds} intentos de fraude detectados</span>`;
+  }
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color: var(--text-muted); padding: 20px;">No hay transacciones registradas que coincidan con el filtro</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(t => {
+    const isFraud = t.isAnomaly || t.status === 'SOSPECHOSA';
+    const statusBadge = isFraud 
+      ? '<span class="badge-risk badge-risk-critico">SOSPECHOSA</span>' 
+      : '<span class="badge-trend up">APROBADA</span>';
+    
+    let diagBadge = '';
+    if (isFraud) {
+      diagBadge = `<span style="color:#f87171; font-weight:700; display:flex; align-items:center; gap:4px;">🚨 POSIBLE FRAUDE <small style="color:var(--text-muted)">(${t.burst || 'Ráfaga <3s'})</small></span>`;
+    } else {
+      diagBadge = `<span style="color:#4ade80;">✅ Normal</span>`;
+    }
+
+    let sevBadge = '<span style="color:var(--text-muted)">-</span>';
+    if (t.severity === 'CRITICO') sevBadge = '<span class="badge-risk badge-risk-critico">CRÍTICO</span>';
+    else if (t.severity === 'ALTO') sevBadge = '<span class="badge-risk badge-risk-alto">ALTO</span>';
+    else if (t.severity === 'MEDIO') sevBadge = '<span class="badge-risk badge-risk-medio">MEDIO</span>';
+    else if (t.severity === 'BAJO') sevBadge = '<span class="badge-risk badge-risk-bajo">BAJO</span>';
+
+    const timeStr = t.date ? (t.date.length >= 19 ? t.date.replace('T', ' ').substring(11, 23) : t.date) : 'N/A';
+    const valFmt = parseFloat(t.value).toLocaleString('es-CO', { minimumFractionDigits: 2 });
+    const rowClass = isFraud ? 'row-updated-flash' : '';
+
+    return `
+      <tr class="${rowClass}">
+        <td style="font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary);">${timeStr}</td>
+        <td style="font-family: var(--font-mono); font-weight: 700; color: #38bdf8;">${t.idTxn}</td>
+        <td>
+          <div style="font-weight: 600;">${t.user}</div>
+        </td>
+        <td style="font-family: var(--font-mono); font-weight: 700;">$ ${valFmt}</td>
+        <td><span class="tag">${t.paymentMethod}</span></td>
+        <td>${statusBadge}</td>
+        <td>${diagBadge}</td>
+        <td>${sevBadge}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+async function syncLiveTransactionsLog() {
+  const terminal = document.getElementById('sim-log-terminal');
+
+  try {
+    const res = await fetch('/api/transacciones?limit=250');
+    if (!res.ok) return;
+    const data = await res.json();
+    const txns = data.transactions || [];
+    cachedLiveTxns = txns;
+
+    renderLiveTxnsTable();
+
+    if (!terminal) return;
+
+    if (txns.length === 0) {
+      if (seenTxnIds.size > 0) {
+        seenTxnIds.clear();
+        terminal.innerHTML = `
+          <div class="log-entry">
+            <span class="log-time">[Sistema]</span>
+            <span class="log-status approved">Terminal listo. Sin transacciones pendientes.</span>
+          </div>
+        `;
+      }
+      return;
+    }
+
+    if (seenTxnIds.size === 0) {
+      terminal.innerHTML = '';
+      for (const t of txns.slice().reverse()) {
+        seenTxnIds.add(t.idTxn);
+        appendTxnToTerminal(t, terminal);
+      }
+      return;
+    }
+
+    const newTxns = txns.filter(t => !seenTxnIds.has(t.idTxn));
+    for (const t of newTxns.reverse()) {
+      seenTxnIds.add(t.idTxn);
+      appendTxnToTerminal(t, terminal);
+    }
+  } catch (err) {
+    console.error('Error sincronizando telemetría en vivo:', err);
+  }
+}
+
+function appendTxnToTerminal(t, terminal) {
+  const timeStr = t.date ? (t.date.length >= 19 ? t.date.substring(11, 23) : t.date) : new Date().toLocaleTimeString();
+  const isSuspicious = t.status === 'SOSPECHOSA';
+  const statusClass = isSuspicious ? 'suspicious' : 'approved';
+  const icon = isSuspicious ? '🚨 FRAUDE' : '✅ OK';
+  const valFmt = parseFloat(t.value).toLocaleString('es-CO', { minimumFractionDigits: 2 });
+
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  entry.innerHTML = `
+    <span class="log-time">[${timeStr}]</span>
+    <span class="log-status ${statusClass}">
+      ${icon} | <strong>${t.idTxn}</strong> | ${t.user} | $${valFmt} | ${t.status} (${t.paymentMethod})
+    </span>
+  `;
+  terminal.prepend(entry);
+
+  while (terminal.children.length > 250) {
+    terminal.removeChild(terminal.lastChild);
+  }
+}
+
 // Inicialización global
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
   initPeriodSelector();
   initUserSearch();
+  initTxFilters();
   checkSystemHealth();
-  fetchDashboardStats('hoy');
+  fetchDashboardStats(currentPeriod);
   loadUsersHistory();
+  syncLiveTransactionsLog();
 
   // Actualizar salud cada 30 segundos
   setInterval(checkSystemHealth, 30000);
+
+  // Auto-refresco en vivo cada 2.5 segundos (Telemetría + Tabla Auditoría + KPIs + Directorio)
+  setInterval(() => {
+    syncLiveTransactionsLog();
+    fetchDashboardStats(currentPeriod);
+    loadUsersHistory();
+  }, 2500);
 });
 
 window.refreshDashboard = () => {
   fetchDashboardStats(currentPeriod);
   loadUsersHistory();
+  syncLiveTransactionsLog();
 };
 window.loadUsersHistory = loadUsersHistory;

@@ -30,9 +30,10 @@
 
         <!-- Selector de periodo -->
         <div class="period-selector">
-          <button class="period-btn active" data-period="hoy">Hoy</button>
+          <button class="period-btn" data-period="hoy">Hoy</button>
           <button class="period-btn" data-period="semana">Semana</button>
           <button class="period-btn" data-period="mes">Mes</button>
+          <button class="period-btn active" data-period="todo">Todo</button>
         </div>
 
         <!-- Selector de tema claro/oscuro -->
@@ -233,6 +234,60 @@
       </div>
     </section>
 
+    <!-- Registro e Intentos de Fraude en Tiempo Real (Live Audit Feed) -->
+    <section class="user-directory-card" style="margin-top: 36px; border: 1px solid rgba(239, 68, 68, 0.25);">
+      <div class="user-directory-header">
+        <div>
+          <h2 class="section-title" style="margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
+            <span>🚨 Registro de Transacciones e Intentos de Fraude</span>
+            <span class="tag" style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);">
+              ● Streaming en Vivo
+            </span>
+          </h2>
+          <p style="font-size: 13px; color: var(--text-secondary);" id="live-txns-subtitle">
+            Monitoreo continuo de cada transacción, disparos de ventana deslizante [t - 3s, t] y severidades.
+          </p>
+        </div>
+
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+          <div class="period-selector">
+            <button class="period-btn active" data-tx-filter="all" id="btn-tx-all">Todas</button>
+            <button class="period-btn" data-tx-filter="fraud" id="btn-tx-fraud" style="color: #f87171; font-weight: 700;">🚨 Solo Fraude</button>
+            <button class="period-btn" data-tx-filter="approved" id="btn-tx-approved" style="color: #4ade80;">✅ Aprobadas</button>
+          </div>
+
+          <div class="user-search-wrapper" style="min-width: 220px;">
+            <span class="user-search-icon">🔍</span>
+            <input type="text" id="live-txns-search" class="user-search-input" placeholder="Filtrar por ID o usuario...">
+          </div>
+        </div>
+      </div>
+
+      <div class="users-table-container" style="max-height: 480px; overflow-y: auto;">
+        <table class="users-table">
+          <thead>
+            <tr>
+              <th>Hora Exacta</th>
+              <th>ID Transacción</th>
+              <th>Usuario</th>
+              <th>Monto</th>
+              <th>Método</th>
+              <th>Estado</th>
+              <th>Diagnóstico de Ventana</th>
+              <th>Severidad</th>
+            </tr>
+          </thead>
+          <tbody id="live-txns-tbody">
+            <tr>
+              <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 20px;">
+                Conectando con el registro en tiempo real...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
     <!-- Visualizador de Ventana Deslizante (Sliding Window Visualizer) -->
     <h2 class="section-title" style="margin-top: 36px;">
       Visualizador de Ventana Deslizante (Sliding Window)
@@ -392,9 +447,9 @@
     </div>
   </footer>
 
-  <!-- Scripts de la aplicación -->
-  <script src="../static/js/dashboard.js"></script>
-  <script src="../static/js/sliding-window.js"></script>
-  <script src="../static/js/simulator.js"></script>
+  <!-- Scripts de la aplicación con anti-caché -->
+  <script src="../static/js/dashboard.js?v=2.4"></script>
+  <script src="../static/js/sliding-window.js?v=2.4"></script>
+  <script src="../static/js/simulator.js?v=2.4"></script>
 </body>
 </html>

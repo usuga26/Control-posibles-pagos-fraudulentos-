@@ -55,6 +55,9 @@ def _periodo_range(periodo: str) -> tuple[datetime, datetime]:
     elif periodo == "mes":
         start = today_start - timedelta(days=30)
         end = end_buffer
+    elif periodo in ("todo", "todos"):
+        start = datetime(2000, 1, 1, tzinfo=BOGOTA_TZ)
+        end = datetime(2100, 1, 1, tzinfo=BOGOTA_TZ)
     else:
         start = today_start
         end = end_buffer
@@ -172,19 +175,20 @@ def get_dashboard_stats(db: Session, periodo: str) -> DashboardStatsResponse:
                 pico_hora = None
 
     # Tendencia: variación porcentual vs periodo anterior
-    txns_prev = (
-        db.query(Transaccion)
-        .filter(
-            Transaccion.fecha_recepcion >= prev_start.replace(tzinfo=None),
-            Transaccion.fecha_recepcion <= prev_end.replace(tzinfo=None),
-        )
-        .count()
-    )
     tendencia: float | None = None
-    if txns_prev > 0:
-        tendencia = round(((total - txns_prev) / txns_prev) * 100, 2)
-    elif total > 0:
-        tendencia = 100.0
+    if periodo not in ("todo", "todos"):
+        txns_prev = (
+            db.query(Transaccion)
+            .filter(
+                Transaccion.fecha_recepcion >= prev_start.replace(tzinfo=None),
+                Transaccion.fecha_recepcion <= prev_end.replace(tzinfo=None),
+            )
+            .count()
+        )
+        if txns_prev > 0:
+            tendencia = round(((total - txns_prev) / txns_prev) * 100, 2)
+        elif total > 0:
+            tendencia = 100.0
 
     # Por método de pago
     pago_counts: dict[str, int] = {}

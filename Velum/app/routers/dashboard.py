@@ -31,9 +31,9 @@ router = APIRouter(prefix="/api/dashboard", tags=["dashboard"])
     summary="Obtener estadísticas consolidadas del dashboard",
 )
 def get_stats(
-    periodo: Literal["hoy", "semana", "mes"] = Query(
+    periodo: Literal["hoy", "semana", "mes", "todo", "todos"] = Query(
         default="hoy",
-        description="Periodo de consulta: hoy, semana o mes",
+        description="Periodo de consulta: hoy, semana, mes o todo",
     ),
     db: Session = Depends(get_db),
 ):
@@ -57,24 +57,37 @@ def get_stats(
 
 
 @router.get(
-    "/timeline-sliding-window/{usuario_id}",
+    "/timeline-sliding-window/{identifier}",
     response_model=TimelineResponse,
     responses={
         404: {"model": ErrorResponse, "description": "Usuario no encontrado"},
         500: {"model": ErrorResponse},
     },
-    summary="Visualización cronológica de ventana deslizante por usuario",
+    summary="Visualización cronológica de ventana deslizante por usuario (ID o Email)",
 )
 def get_user_timeline(
-    usuario_id: int,
+    identifier: str,
     db: Session = Depends(get_db),
 ):
-    """Construye la serie de tiempo detallada de transacciones para un usuario dado.
+    """Construye la serie de tiempo para un usuario especificado por su ID o Email."""
+    usuario = None
+    if identifier.isdigit():
+        usuario = db.get(Usuario, int(identifier))
+    if not usuario:
+        usuario = db.query(Usuario).filter(Usuario.email == identifier.strip().lower()).first()
 
-    Calcula de manera exacta para cada transacción si se encontraba dentro de una
-    ventana activa de 3 segundos, el conteo en ese instante, severidad y regla disparada.
-    """
-    usuario = db.get(Usuario, usuario_id)
+    # Si no existe aún y es email, auto-crear usuario para la ventana
+    if not usuario and ("@" in identifier):
+        from app.models import EstadoUsuario
+        usuario = Usuario(
+            email=identifier.strip().lower(),
+            nombre=identifier.split("@")[0],
+            estado=EstadoUsuario.ACTIVO,
+        )
+        db.add(usuario)
+        db.commit()
+        db.refresh(usuario)
+
     if not usuario:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -82,16 +95,16 @@ def get_user_timeline(
                 "success": False,
                 "error": {
                     "code": "USER_NOT_FOUND",
-                    "message": f"Usuario con ID {usuario_id} no encontrado",
+                    "message": f"Usuario {identifier} no encontrado",
                 },
             },
         )
 
     try:
-        timeline = get_timeline(db, usuario_id=usuario_id)
+        timeline = get_timeline(db, usuario_id=usuario.id)
         return timeline
     except Exception as exc:
-        logger.error("Error al obtener timeline para usuario %s: %s", usuario_id, exc, exc_info=True)
+        logger.error("Error al obtener timeline para usuario %s: %s", identifier, exc, exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail={"success": False, "error": {"code": "INTERNAL_ERROR", "message": str(exc)}},
