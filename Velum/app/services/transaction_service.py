@@ -79,14 +79,22 @@ class ConflictTransactionError(Exception):
 # ---------------------------------------------------------------------------
 
 def _parse_client_date(date_str: str) -> datetime:
-    """Parsea fecha del cliente asumiendo ISO8601 estricto (UTC).
+    """Parsea fecha del cliente convirtiéndola a UTC de forma segura.
     
-    Elimina la vulnerabilidad de inyección de husos horarios locales.
+    Si contiene sufijo 'Z', respeta UTC sin aplicar desfase adicional.
+    Si viene sin zona (formato Bogotá local), asocia la zona horaria del negocio y convierte a UTC.
     """
     from zoneinfo import ZoneInfo
     from app.config import settings
-    dt_naive = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%f")
-    # Forzar estricto a la zona horaria de la aplicación (Bogotá) y convertir a UTC
+    
+    clean_str = date_str.strip().replace(" ", "T")
+    is_utc_explicit = clean_str.endswith("Z")
+    if is_utc_explicit:
+        clean_str = clean_str[:-1]
+
+    dt_naive = datetime.strptime(clean_str, "%Y-%m-%dT%H:%M:%S.%f")
+    if is_utc_explicit:
+        return dt_naive.replace(tzinfo=timezone.utc)
     return dt_naive.replace(tzinfo=ZoneInfo(settings.timezone)).astimezone(timezone.utc)
 
 
@@ -284,7 +292,7 @@ def process_transaction(
                     db, user.id, received_at, current_window_seconds
                 )
 
-                slot_name, reference, _ = get_time_slot_reference(
+                slot_name, reference = get_time_slot_reference(
                     received_at.astimezone(zoneinfo.ZoneInfo(settings.timezone))
                 )
                 severity_str = calculate_severity(result.transaction_count, reference)

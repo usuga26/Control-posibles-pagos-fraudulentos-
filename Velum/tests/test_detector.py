@@ -188,3 +188,26 @@ def test_detector_concurrency():
 
     snapshot = det.get_window_snapshot(user)
     assert len(snapshot) == 20
+
+
+def test_rebuild_from_history():
+    """Valida la reconstrucción de la ventana deslizante desde el historial filtrando timestamps antiguos."""
+    t0 = datetime(2026, 9, 23, 12, 0, 10, tzinfo=timezone.utc)
+    det = SlidingWindowDetector(window_seconds=3, threshold=3, clock=lambda: t0)
+    user = "history@user.com"
+
+    # Transacciones: 2 dentro de la ventana de 3s [12:00:07, 12:00:10], 2 fuera (< 12:00:07)
+    timestamps = [
+        t0 - timedelta(seconds=10),
+        t0 - timedelta(seconds=5),
+        t0 - timedelta(seconds=2),
+        t0 - timedelta(seconds=1),
+    ]
+
+    det.rebuild_from_history(user, timestamps)
+    snapshot = det.get_window_snapshot(user)
+
+    assert len(snapshot) == 2
+    assert snapshot[0] == (t0 - timedelta(seconds=2)).timestamp()
+    assert snapshot[1] == (t0 - timedelta(seconds=1)).timestamp()
+

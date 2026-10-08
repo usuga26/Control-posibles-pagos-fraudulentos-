@@ -44,23 +44,23 @@ def _periodo_range(periodo: str) -> tuple[datetime, datetime]:
     """
     now_bogota = datetime.now(BOGOTA_TZ)
     today_start = now_bogota.replace(hour=0, minute=0, second=0, microsecond=0)
-    end_buffer = now_bogota + timedelta(minutes=5)
+    today_end = now_bogota.replace(hour=23, minute=59, second=59, microsecond=999999)
 
     if periodo == "hoy":
         start = today_start
-        end = end_buffer
+        end = today_end
     elif periodo == "semana":
         start = today_start - timedelta(days=7)
-        end = end_buffer
+        end = today_end
     elif periodo == "mes":
         start = today_start - timedelta(days=30)
-        end = end_buffer
+        end = today_end
     elif periodo in ("todo", "todos"):
         start = datetime(2000, 1, 1, tzinfo=BOGOTA_TZ)
         end = datetime(2100, 1, 1, tzinfo=BOGOTA_TZ)
     else:
         start = today_start
-        end = end_buffer
+        end = today_end
 
     return start.astimezone(timezone.utc), end.astimezone(timezone.utc)
 
@@ -80,9 +80,16 @@ def get_dashboard_stats(db: Session, periodo: str) -> DashboardStatsResponse:
     # SQLite almacena datetimes como cadenas naive; usamos UTC naive para el filtro SQL
     start_naive = start.replace(tzinfo=None)
     end_naive = end.replace(tzinfo=None)
+    from sqlalchemy import or_
+
     txns = (
         db.query(Transaccion)
-        .filter(Transaccion.fecha_recepcion >= start_naive, Transaccion.fecha_recepcion <= end_naive)
+        .filter(
+            or_(
+                (Transaccion.fecha_recepcion >= start_naive) & (Transaccion.fecha_recepcion <= end_naive),
+                (Transaccion.fecha_txn >= start_naive) & (Transaccion.fecha_txn <= end_naive),
+            )
+        )
         .all()
     )
 
@@ -180,8 +187,10 @@ def get_dashboard_stats(db: Session, periodo: str) -> DashboardStatsResponse:
         txns_prev = (
             db.query(Transaccion)
             .filter(
-                Transaccion.fecha_recepcion >= prev_start.replace(tzinfo=None),
-                Transaccion.fecha_recepcion <= prev_end.replace(tzinfo=None),
+                or_(
+                    (Transaccion.fecha_recepcion >= prev_start.replace(tzinfo=None)) & (Transaccion.fecha_recepcion <= prev_end.replace(tzinfo=None)),
+                    (Transaccion.fecha_txn >= prev_start.replace(tzinfo=None)) & (Transaccion.fecha_txn <= prev_end.replace(tzinfo=None)),
+                )
             )
             .count()
         )
@@ -333,7 +342,8 @@ def get_users_directory(db: Session, periodo: str = "todos") -> list[dict]:
         if start_naive and end_naive:
             txns = [
                 t for t in all_txns
-                if start_naive <= (t.fecha_recepcion.replace(tzinfo=None) if t.fecha_recepcion.tzinfo else t.fecha_recepcion) <= end_naive
+                if (start_naive <= (t.fecha_recepcion.replace(tzinfo=None) if t.fecha_recepcion.tzinfo else t.fecha_recepcion) <= end_naive)
+                or (start_naive <= (t.fecha_txn.replace(tzinfo=None) if t.fecha_txn.tzinfo else t.fecha_txn) <= end_naive)
             ]
         else:
             txns = all_txns

@@ -28,12 +28,12 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 class DetectionResult(NamedTuple):
-    """Resultado del análisis de una transacción usando Epoch absolutos."""
+    """Resultado del análisis de una transacción."""
     anomaly_detected: bool
     transaction_count: int
     severity: str | None
-    window_start: float | None
-    window_end: float | None
+    window_start: datetime | None
+    window_end: datetime | None
     window_seconds: int
 
 
@@ -41,15 +41,15 @@ class DetectionResult(NamedTuple):
 # Cálculo de severidad
 # ---------------------------------------------------------------------------
 
-def get_time_slot_reference(dt_bogota: datetime) -> tuple[str, int, int]:
-    """Determina la franja horaria, su referencia de transacciones y ventana dinámica."""
+def get_time_slot_reference(dt_bogota: datetime) -> tuple[str, int]:
+    """Determina la franja horaria y su referencia de transacciones."""
     hour = dt_bogota.hour
     if 5 <= hour < 12:
-        return "mañana", settings.ref_morning, settings.window_morning
+        return "mañana", settings.ref_morning
     elif 12 <= hour < 20:
-        return "tarde", settings.ref_afternoon, settings.window_afternoon
+        return "tarde", settings.ref_afternoon
     else:
-        return "noche", settings.ref_night, settings.window_night
+        return "noche", settings.ref_night
 
 
 def calculate_severity(count: int, reference: int) -> str:
@@ -119,7 +119,8 @@ class SlidingWindowDetector:
             bogota_tz = tz(timedelta(hours=-5))
 
         dt_bogota = received_at.astimezone(bogota_tz)
-        slot_name, reference, current_window_seconds = get_time_slot_reference(dt_bogota)
+        slot_name, reference = get_time_slot_reference(dt_bogota)
+        current_window_seconds = self.window_seconds
         
         try:
             lock = self._get_user_lock(user)
@@ -149,12 +150,15 @@ class SlidingWindowDetector:
                 user, now_epoch, severity, count, current_window_seconds
             )
 
+            dt_window_start = datetime.fromtimestamp(window_start_epoch, tz=timezone.utc)
+            dt_window_end = datetime.fromtimestamp(now_epoch, tz=timezone.utc)
+
             return DetectionResult(
                 anomaly_detected=True,
                 transaction_count=count,
                 severity=severity,
-                window_start=window_start_epoch,
-                window_end=now_epoch,
+                window_start=dt_window_start,
+                window_end=dt_window_end,
                 window_seconds=current_window_seconds,
             )
         except Exception as e:
@@ -167,15 +171,7 @@ class SlidingWindowDetector:
         now = self.clock()
         now_epoch = now.timestamp()
         
-        try:
-            import zoneinfo
-            bogota_tz = zoneinfo.ZoneInfo(settings.timezone)
-        except Exception:
-            from datetime import timezone as tz, timedelta
-            bogota_tz = tz(timedelta(hours=-5))
-
-        dt_bogota = now.astimezone(bogota_tz)
-        _, _, current_window_seconds = get_time_slot_reference(dt_bogota)
+        current_window_seconds = self.window_seconds
         window_start_epoch = now_epoch - current_window_seconds
 
         # Aplicar el límite O(K) de forma estricta cortando los últimos K elementos

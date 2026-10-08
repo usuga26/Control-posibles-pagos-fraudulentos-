@@ -102,7 +102,7 @@ class TransaccionRequest(BaseModel):
                 if d_raw.endswith("Z"):
                     d_raw = d_raw[:-1]
                 if d_raw.lower() in {"", "null", "undefined", "false", "true", "0", "none"} or d_raw.startswith("-") or d_raw.isdigit() or ("T" not in d_raw and "-" not in d_raw):
-                    d["date"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]
+                    d["date"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
                 else:
                     d["date"] = d_raw
 

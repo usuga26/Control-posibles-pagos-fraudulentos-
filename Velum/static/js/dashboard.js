@@ -293,21 +293,26 @@ function initTheme() {
 }
 
 function initPeriodSelector() {
-  const buttons = document.querySelectorAll('.period-btn');
+  const buttons = document.querySelectorAll('.app-header .period-btn, [data-period]');
   buttons.forEach(btn => {
-    if (btn.getAttribute('data-period') === currentPeriod) {
+    const p = btn.getAttribute('data-period');
+    if (!p) return;
+    if (p === currentPeriod) {
       btn.classList.add('active');
     } else {
       btn.classList.remove('active');
     }
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
       buttons.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      const p = btn.getAttribute('data-period');
-      currentPeriod = p;
-      localStorage.setItem('velum_period', p);
-      fetchDashboardStats(p);
+      const newP = btn.getAttribute('data-period');
+      if (!newP) return;
+      currentPeriod = newP;
+      localStorage.setItem('velum_period', newP);
+      fetchDashboardStats(newP);
       loadUsersHistory();
+      syncLiveTransactionsLog();
     });
   });
 }
@@ -469,7 +474,8 @@ function renderLiveTxnsTable() {
   });
 
   if (subtitle) {
-    subtitle.innerHTML = `Mostrando <strong>${filtered.length}</strong> de <strong>${cachedLiveTxns.length}</strong> transacciones procesadas · 🚨 <span style="color:#f87171; font-weight:700;">${totalFrauds} intentos de fraude detectados</span>`;
+    const pLabel = currentPeriod === 'hoy' ? 'HOY' : (currentPeriod === 'semana' ? 'ÚLTIMOS 7 DÍAS' : (currentPeriod === 'mes' ? 'ÚLTIMOS 30 DÍAS' : 'HISTÓRICO COMPLETO'));
+    subtitle.innerHTML = `Filtro periodo: <strong style="color:#38bdf8;">${pLabel}</strong> · Mostrando <strong>${filtered.length}</strong> de <strong>${cachedLiveTxns.length}</strong> transacciones · 🚨 <span style="color:#f87171; font-weight:700;">${totalFrauds} intentos de fraude detectados</span>`;
   }
 
   if (filtered.length === 0) {
@@ -521,7 +527,8 @@ async function syncLiveTransactionsLog() {
   const terminal = document.getElementById('sim-log-terminal');
 
   try {
-    const res = await fetch('/api/transacciones?limit=250');
+    const pParam = (currentPeriod && currentPeriod !== 'todo' && currentPeriod !== 'todos') ? `&periodo=${encodeURIComponent(currentPeriod)}` : '';
+    const res = await fetch(`/api/transacciones?limit=250${pParam}`);
     if (!res.ok) return;
     const data = await res.json();
     const txns = data.transactions || [];

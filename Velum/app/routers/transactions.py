@@ -258,6 +258,7 @@ def list_transactions(
     limit: int = Query(50, ge=1, le=500),
     user: str | None = Query(None),
     status_filter: str | None = Query(None, alias="status"),
+    periodo: str | None = Query(None, description="Filtro de periodo: hoy, semana, mes, todo"),
     db: Session = Depends(get_db),
 ):
     """Retorna las últimas transacciones para auditoría y verificación del bot evaluador."""
@@ -266,6 +267,18 @@ def list_transactions(
         query = query.join(Transaccion.usuario).filter(Usuario.email == user.strip().lower())
     if status_filter:
         query = query.filter(Transaccion.estado == status_filter.upper())
+    if periodo and periodo in ("hoy", "semana", "mes"):
+        from app.services.dashboard_service import _periodo_range
+        from sqlalchemy import or_
+        start, end = _periodo_range(periodo)
+        start_naive = start.replace(tzinfo=None)
+        end_naive = end.replace(tzinfo=None)
+        query = query.filter(
+            or_(
+                (Transaccion.fecha_recepcion >= start_naive) & (Transaccion.fecha_recepcion <= end_naive),
+                (Transaccion.fecha_txn >= start_naive) & (Transaccion.fecha_txn <= end_naive),
+            )
+        )
 
     txns = query.limit(limit).all()
     results = []
