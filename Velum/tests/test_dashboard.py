@@ -249,21 +249,7 @@ def test_frontend_and_static_assets_served(client):
         "/static/vendor/chart.umd.js",
         "/static/js/dashboard.js",
         "/static/js/sliding-window.js",
-        "/static/js/simulator.js",
         "/static/hash_vectors.json",
     ]:
         resp_static = client.get(path)
         assert resp_static.status_code == 200, f"Fallo al servir {path}"
-
-
-def test_simulator_endpoints(client):
-    """Verifica los endpoints de utilidad del simulador."""
-    # Obtener vectores oficiales
-    resp_vec = client.get("/api/simulator/hash-vectors")
-    assert resp_vec.status_code == 200
-    assert len(resp_vec.json()["vectors"]) >= 5
-
-    # Reset
-    resp_reset = client.post("/api/simulator/reset")
-    assert resp_reset.status_code == 200
-    assert resp_reset.json()["success"] is True

@@ -27,7 +27,7 @@ from app.config import settings
 from app.database import SessionLocal
 from app.detector import detector
 from app.models import Transaccion, Usuario
-from app.routers import dashboard, simulator, transactions
+from app.routers import dashboard, transactions
 
 # Configurar logging centralizado
 logging.basicConfig(
@@ -232,4 +232,3 @@ for r in transactions.ALL_TRANSACTION_ROUTERS:
     app.include_router(r)
 
 app.include_router(dashboard.router)
-app.include_router(simulator.router)

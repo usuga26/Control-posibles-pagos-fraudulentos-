@@ -1,0 +1,1105 @@
+{
+  "info": {
+    "_postman_id": "velum-fraud-detection-complete-v2",
+    "name": "VELUM — Suite Completa de Pruebas (Dataset del Profesor)",
+    "description": "Colección completa para Postman que cubre el dataset completo de 98 transacciones y todas las variaciones de tipos inválidos, nulos, booleanos y métodos de pago.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "📦 1. DATASET COMPLETO (Las 98 Transacciones del Profesor en Batch)",
+      "item": [
+        {
+          "name": "Enviar las 98 Transacciones del Profesor (Lote Completo Array JSON)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"idTxn\": 10052,\n    \"user\": \"lyfgnrkkg@hotmail.com\",\n    \"date\": \"2026-03-05T02:44:21.670Z\",\n    \"value\": 468296,\n    \"paymentMethod\": 0,\n    \"hash\": \"1a6bff244d7580a55952888839ff19ccf485be91aa87ea7e9e0c8882332ae430\"\n  },\n  {\n    \"idTxn\": 10071,\n    \"user\": \"dwsvpz@gmail.com\",\n    \"date\": \"2022-04-24T17:45:46.693Z\",\n    \"value\": 0,\n    \"paymentMethod\": \"Paypal\",\n    \"hash\": \"7650d43f3d016c2973be666d76b0561700a53779b1f174c04f006976c1bc6ab1\"\n  },\n  {\n    \"idTxn\": 10026,\n    \"user\": \"csugrzolt@gmail.com\",\n    \"date\": \"2026-04-14T16:08:04.586Z\",\n    \"value\": false,\n    \"paymentMethod\": \"Paypal\",\n    \"hash\": \"ba6e46b9ba47c481edd12453be94c096b5766dde7d9bb70c5a662a195597c808\"\n  },\n  {\n    \"idTxn\": 10034,\n    \"user\": \"null\",\n    \"date\": \"2022-05-21T06:18:46.025Z\",\n    \"value\": -66175,\n    \"paymentMethod\": \"Tarjeta\",\n    \"hash\": \"d965c9b3b3b804a2aec049fccb1bbda4262c0d6c0a6ecfdf2e87dab86e6bfdc5\"\n  },\n  {\n    \"idTxn\": 10037,\n    \"user\": \"srbhqpilza@gmail.com\",\n    \"date\": \"\",\n    \"value\": 3432023,\n    \"paymentMethod\": \"Transferencia\",\n    \"hash\": \"\"\n  },\n  {\n    \"idTxn\": \"\",\n    \"user\": \"kjqaiho@yahoo.com\",\n    \"date\": \"2018-01-15T00:18:59.899Z\",\n    \"value\": 705620,\n    \"paymentMethod\": \"Efectivo\",\n    \"hash\": \"5d342b565d78aa1715c37ffccdbd0c85d6616f99b6dc85fe20732c950a66c2ba\"\n  },\n  {\n    \"idTxn\": 10063,\n    \"user\": \"unqvducc@outlook.com\",\n    \"date\": \"2025-06-10T17:43:13.367Z\",\n    \"value\": 3026857,\n    \"paymentMethod\": \"Paypal\",\n    \"hash\": \"2bdb3d87952eb480db7e9eed7f5b52c1fed87952442a1a617fa8b30e7f3356e9\"\n  },\n  {\n    \"idTxn\": 0,\n    \"user\": \"uqrkeyic@empresa.com\",\n    \"date\": \"2017-08-30T11:07:56.877Z\",\n    \"value\": 3983506,\n    \"paymentMethod\": \"Apple Pay\",\n    \"hash\": \"9b2bfedecdcbd6792fe302bf633f029c17ef819c76aace32d11069c4ce11f054\"\n  },\n  {\n    \"idTxn\": false,\n    \"user\": \"lccbtlyt@gmail.com\",\n    \"date\": 0,\n    \"value\": 1991661,\n    \"paymentMethod\": \"Apple Pay\",\n    \"hash\": \"b66888ecf260f695b7e43d41c6820bc1a4ae68ad96b29aafe8c9fb33a9c174cb\"\n  },\n  {\n    \"idTxn\": 10012,\n    \"user\": \"gelurqlcu@outlook.com\",\n    \"date\": \"2022-01-05T02:52:11.105Z\",\n    \"value\": 852224,\n    \"paymentMethod\": \"Efectivo\",\n    \"hash\": \"883dcfab75daa3649652ca7ca5cd371ecc09da919d3c217c04186202d7772f4a\"\n  },\n  {\n    \"idTxn\": 10045,\n    \"user\": \"awcfjsyp@hotmail.com\",\n    \"date\": \"2024-05-14T00:13:28.062Z\",\n    \"value\": 2823841,\n    \"paymentMethod\": \"Transferencia\",\n    \"hash\": \"b72be5c9b8a262b07d5484fde159d1ce44ac6cb441f18ebf557b25509686fc42\"\n  },\n  {\n    \"idTxn\": \"null\",\n    \"user\": \"lyfgnrkkg@hotmail.com\",\n    \"date\": \"2022-11-03T16:17:41.123Z\",\n    \"value\": 2571324,\n    \"paymentMethod\": \"Google Pay\",\n    \"hash\": \"c2e7537ec57b2d1d353361673521a52535fc3afa2bbe453ba4df59a25db5d095\"\n  },\n  {\n    \"idTxn\": 10032,\n    \"user\": \"null\",\n    \"date\": -653667,\n    \"value\": 4928113,\n    \"paymentMethod\": \"Efectivo\",\n    \"hash\": \"21a3654c98c156ea008ad01144b071129369d40805c076f8b5173ec040ef0ddc\"\n  },\n  {\n    \"idTxn\": \"undefined\",\n    \"user\": \"csugrzolt@gmail.com\",\n    \"date\": \"2026-04-14T16:08:02.586Z\",\n    \"value\": 4468632,\n    \"paymentMethod\": \"Paypal\",\n    \"hash\": \"37847f38ff6ea186ae3c68bdd5b14cff44de7ee0d4b105392f8df36c52a79871\"\n  },\n  {\n    \"idTxn\": 10083,\n    \"user\": \"hnbvmbyodo@empresa.com\",\n    \"date\": \"2017-02-19T14:23:19.427Z\",\n    \"value\": 3310292,\n    \"paymentMethod\": \"O8EtaCZM\",\n    \"hash\": \"ba49a7869aa1cbffea1efb53ed20f83d562237125d9845e3c1bf4ed7d329c2bf\"\n  },\n  {\n    \"idTxn\": 10033,\n    \"user\": 0,\n    \"date\": \"2022-05-21T06:18:45.025Z\",\n    \"value\": 2216607,\n    \"paymentMethod\": \"Google Pay\",\n    \"hash\": \"31a644e66988e7ace2a87d6b2d6017d5767471c1e069ef442e6c055845c52baf\"\n  },\n  {\n    \"idTxn\": 10056,\n    \"user\": \"zuqkt@yahoo.com\",\n    \"date\": \"2021-08-14T23:50:58.623Z\",\n    \"value\": 4622682,\n    \"paymentMethod\": \"Efectivo\",\n    \"hash\": \"27d2e12400ac40a3afa186102f578a35\"\n  },\n  {\n    \"idTxn\": 10068,\n    \"user\": \"hnbvmbyodo@empresa.com\",\n    \"date\": \"2020-02-17T16:25:33.140Z\",\n    \"value\": 4795454,\n    \"paymentMethod\": \"Apple Pay\",\n    \"hash\": \"a15377698e9eaa88d67b759de10225064b715e9a3d6ce04c114d636f29bf1713\"\n  },\n  {\n    \"idTxn\": \"null\",\n    \"user\": \"gelurqlcu@outlook.com\",\n    \"date\": \"2022-01-05T02:52:12.105Z\",\n    \"value\": 3047882,\n    \"paymentMethod\": \"Paypal\",\n    \"hash\": \"e5bG252061b2df827a79d5b1b3a1876991887cfa9d60bff666cc0011fa82565c\"\n  },\n  {\n    \"idTxn\": 10057,\n    \"user\": \"\",\n    \"date\": \"2022-01-09T01:50:47.630Z\",\n    \"value\": 2961030,\n    \"paymentMethod\": \"0JKjW1qk\",\n    \"hash\": \"eda6c01e8118814938b0c64aed07117d851c067adc317affd7bc5df62287df47\"\n  },\n  {\n    \"idTxn\": 10016,\n    \"user\": \"kjqaiho@yahoo.com\",\n    \"date\": \"2018-01-15T00:18:53.899Z\",\n    \"value\": \"\",\n    \"paymentMethod\": \"null\",\n    \"hash\": \"08fdb3862d9bf8c902d8395d4f47d4127c4f32967f23867b80105dbe209b6f21\"\n  },\n  {\n    \"idTxn\": 10048,\n    \"user\": \"cfuihepvff@yahoo.com\",\n    \"date\": \"2015-02-26T13:45:04.310Z\",\n    \"value\": 419287,\n    \"paymentMethod\": \"null\",\n    \"hash\": \"49d33c44034c86a2006482f9b1776da0718b828cde21bc1ff6bc8670fedef593\"\n  },\n  {\n    \"idTxn\": 10020,\n    \"user\": \"kjqaiho@yahoo.com\",\n    \"date\": \"2018-01-15T00:18:57.899Z\",\n    \"value\": 898505,\n    \"paymentMethod\": \"Tarjeta\",\n    \"hash\": \"ea8f3baea13dd625a9b2ed0da20dcbaa9c7f8032344f57108b445896d9ffce09\"\n  },\n  {\n    \"idTxn\": 10088,\n    \"user\": \"ryqvkzr@gmail.com\",\n    \"date\": \"2020-08-08T20:06:39.178Z\",\n    \"value\": 1580147,\n    \"paymentMethod\": \"Google Pay\",\n    \"hash\": \"acab53f6f58845f16b1d1eaf62afb90b437eb451f38b83cee4130017c2ed1e59\"\n  },\n  {\n    \"idTxn\": 10003,\n    \"user\": \"uqrkeyic@empresa.com\",\n    \"date\": \"2017-08-30T11:07:52.877Z\",\n    \"value\": 4291457,\n    \"paymentMethod\": \"Google Pay\",\n    \"hash\": \"29eeecae61284dd5877d7c343d75a9802a29352f7060f53628cd5d65c6b27ff1\"\n  },\n  {\n    \"idTxn\": 10086,\n    \"user\": \"dfsihf@gmail.com\",\n    \"date\": \"2021-02-04T22:47:24.528Z\",\n    \"value\": 1612715,\n    \"paymentMethod\": \"Google Pay\",\n    \"hash\": \"de5d48c24e36333331eadaa0589dd6436c41511c90ee3920d4e54c945cd56967\"\n  },\n  {\n    \"idTxn\": 10085,\n    \"user\": \"hnbvmbyodo@empresa.com\",\n    \"date\": \"2017-06-21T03:50:31.394Z\",\n    \"value\": 2818919,\n    \"paymentMethod\": \"Efectivo\",\n    \"hash\": \"4c95cd23775dad8598f3ac05edda82146bcd4f8a115b4cba5ffbfc7b28ffddde\"\n  },\n  {\n    \"idTxn\": 10082,\n    \"user\": \"zuqkt@yahoo.com\",\n    \"date\": \"2017-11-17T19:33:27.002Z\",\n    \"value\": 233061,\n    \"paymentMethod\": \"Paypal\",\n    \"hash\": \"58f61d5e77a54d4e63f6a1bf613d90266786aa1cae811799ee337664cce4141c\"\n  },\n  {\n    \"idTxn\": 10078,\n    \"user\": \"bjrowsse@empresa.com\",\n    \"date\": \"2022-04-21T12:54:41.121Z\",\n    \"value\": 184594,\n    \"paymentMethod\": \"Google Pay\",\n    \"hash\": \"b09f50549d560651c6bcf205fbcc8b31a395c45cb1a61be386d9f6e272cb6ecd\"\n  },\n  {\n    \"idTxn\": 10030,\n    \"user\": \"yuzspx@outlook.com\",\n    \"date\": \"2022-05-21T06:18:42.025Z\",\n    \"value\": 4535164,\n    \"paymentMethod\": \"Apple Pay\",\n    \"hash\": \"28054eaf03eff4f1db0c00fa866e8e0c077ef44d93903fd44beb5abe77c369d8\"\n  },\n  {\n    \"idTxn\": 10043,\n    \"user\": \"tnva@empresa.com\",\n    \"date\": \"2026-01-22T03:50:31.009Z\",\n    \"value\": 2745784,\n    \"paymentMethod\": 0,\n    \"hash\": \"57a1712e14ff0d15ae3f713a124b29c3b66036eb32b96c4c401445b832002cc1\"\n  },\n  {\n    \"idTxn\": 10093,\n    \"user\": \"dfsihf@gmail.com\",\n    \"date\": \"2023-07-30T09:03:20.707Z\",\n    \"value\": 4575197,\n    \"paymentMethod\": \"null\",\n    \"hash\": \"207ce08c2b86f28a6381f965b3420a0e1a9f63998b3eec26f422c6b796efff43\"\n  },\n  {\n    \"idTxn\": 10009,\n    \"user\": \"gelurqlcu@outlook.com\",\n    \"date\": \"2022-01-05T02:52:08.105Z\",\n    \"value\": 4606756,\n    \"paymentMethod\": \"Efectivo\",\n    \"hash\": \"50a07eb848a088997978af7ea5b8602e7024d11a84dfef311de9b5ea728ddcce\"\n  },\n  {\n    \"idTxn\": 10098,\n    \"user\": \"bjrowsse@empresa.com\",\n    \"date\": \"2022-07-18T17:11:40.370Z\",\n    \"value\": 4706212,\n    \"paymentMethod\": \"Paypal\",\n    \"hash\": \"14b11ee18b11a2ab1a32125fc70dd143026889eea515084d6e65eaa82dfca3d3\"\n  },\n  {\n    \"idTxn\": 10058,\n    \"user\": \"uviwx@gmail.com\",\n    \"date\": \"2025-11-05T19:50:31.337Z\",\n    \"value\": 173021,\n    \"paymentMethod\": \"Paypal\",\n    \"hash\": \"bb84973a757@20!303268c31024b96719a8ef1d84f2ac10449c90487dbd8d1ca\"\n  },\n  {\n    \"idTxn\": 10055,\n    \"user\": \"qlbxww@yahoo.com\",\n    \"date\": \"2025-07-04T20:02:14.986Z\",\n    \"value\": 4187425,\n    \"paymentMethod\": \"Paypal\",\n    \"hash\": \"3b7225516ce0aeb9893c9df822ad43f8cbe6c9a8ddc2565032afb1b3108f05f4\"\n  },\n  {\n    \"idTxn\": 0,\n    \"user\": \"\",\n    \"date\": \"2022-05-21T06:18:47.025Z\",\n    \"value\": 2496658,\n    \"paymentMethod\": \"Tarjeta\",\n    \"hash\": \"4ade28e226802601fa5ad9c8cd17dd64e8bbb59b42289bd351238614de1a8c4d\"\n  },\n  {\n    \"idTxn\": 10018,\n    \"user\": \"kjqaiho@yahoo.com\",\n    \"date\": \"2018-01-15T00:18:55.899Z\",\n    \"value\": 4379440,\n    \"paymentMethod\": \"Efectivo\",\n    \"hash\": \"8e6920c360ec280888c15bd9a0b6060c961e9fb1011aabd2f1182db8a283d37f\"\n  },\n  {\n    \"idTxn\": -508008,\n    \"user\": \"qlbxww@yahoo.com\",\n    \"date\": \"2017-01-24T08:24:47.339Z\",\n    \"value\": 2803286,\n    \"paymentMethod\": \"Apple Pay\",\n    \"hash\": \"7811a88eba35f630792f03733e58f55897072d7c08c466fde481385d964a5d29\"\n  },\n  {\n    \"idTxn\": 10049,\n    \"user\": \"unqvducc@outlook.com\",\n    \"date\": \"2019-11-02T22:35:36.872Z\",\n    \"value\": 220800,\n    \"paymentMethod\": \"Paypal\",\n    \"hash\": \"67c421e29452aba6ae05b530c0ca1ec0ba298af12f74ca344b0bdc6d8bf9e671\"\n  },\n  {\n    \"idTxn\": \"undefined\",\n    \"user\": \"uviwx@gmail.com\",\n    \"date\": \"2026-12-16T12:22:39.022Z\",\n    \"value\": 953422,\n    \"paymentMethod\": \"Efectivo\",\n    \"hash\": \"eaf608726cfb9bc581a6d0a217f201b87a0cc8e30609f719929496a25e1bb2c8\"\n  },\n  {\n    \"idTxn\": 10002,\n    \"user\": \"uqrkeyic@empresa.com\",\n    \"date\": \"2017-08-30T11:07:51.877Z\",\n    \"value\": 324694,\n    \"paymentMethod\": \"Efectivo\",\n    \"hash\": \"25600b31630469edb797dfafa5b1726aeee6c7f5abd671fa3b69410e1ec3ea22\"\n  },\n  {\n    \"idTxn\": \"undefined\",\n    \"user\": \"lccbtlyt@gmail.com\",\n    \"date\": \"undefined\",\n    \"value\": 1129727,\n    \"paymentMethod\": \"Tarjeta\",\n    \"hash\": \"25828660dc845fc40553f812412efbeceb18eecf8d3e0de22049997122429a3e\"\n  },\n  {\n    \"idTxn\": 10069,\n    \"user\": \"qlbxww@yahoo.com\",\n    \"date\": \"\",\n    \"value\": 3136980,\n    \"paymentMethod\": \"Tarjeta\",\n    \"hash\": \"b260de01e9cf6279103b72b46130eb42f950842aa7dcab327cb92bcc98b93514\"\n  },\n  {\n    \"idTxn\": 10070,\n    \"user\": \"srbhqpilza@gmail.com\",\n    \"date\": \"2023-07-20T06:52:00.193Z\",\n    \"value\": 3766622,\n    \"paymentMethod\": \"Transferencia\",\n    \"hash\": \"\"\n  },\n  {\n    \"idTxn\": 10075,\n    \"user\": \"ryqvkzr@gmail.com\",\n    \"date\": \"2023-04-12T18:49:54.401Z\",\n    \"value\": 3259084,\n    \"paymentMethod\": \"Transferencia\",\n    \"hash\": \"7eb87ae4ff2a3e58341d8beb000733f936b5f1ee35e2b6d843250cffbc7fed3b\"\n  },\n  {\n    \"idTxn\": 715427,\n    \"user\": \"undefined\",\n    \"date\": \"2015-04-01T16:40:26.933Z\",\n    \"value\": 2757259,\n    \"paymentMethod\": \"Tarjeta\",\n    \"hash\": \"af95d5fc4c14c458dc1e9823ebd97bef9e4f481c8addc88c874942078057195f\"\n  },\n  {\n    \"idTxn\": 10092,\n    \"user\": \"hnbvmbyodo@empresa.com\",\n    \"date\": \"2022-02-06T16:55:22.809Z\",\n    \"value\": 4825404,\n    \"paymentMethod\": \"null\",\n    \"hash\": \"dbeda47e3251e2d58b4e74bb9612bb4ce1dc366091ee538e6ed0f3331eb27cff\"\n  },\n  {\n    \"idTxn\": 10046,\n    \"user\": \"uviwx@gmail.com\",\n    \"date\": \"2026-09-21T04:52:47.373Z\",\n    \"value\": 2394,\n    \"paymentMethod\": \"Apple Pay\",\n    \"hash\": \"61a8a3a3d34ac1ac7a76341e7caf4c311f5ed06137c89e2c0807f1cdea7a3bc7\"\n  },\n  {\n    \"idTxn\": 677504,\n    \"user\": \"uzmv@empresa.com\",\n    \"date\": 0,\n    \"value\": 1498670,\n    \"paymentMethod\": \"Efectivo\",\n    \"hash\": \"e5d2ca85fbd429d7317e4645c1a161734346a6c9873e262a0014bb6c3fee2aba\"\n  },\n  {\n    \"idTxn\": 10011,\n    \"user\": \"gelurqlcu@outlook.com\",\n    \"date\": \"2022-01-05T02:52:10.105Z\",\n    \"value\": 3083295,\n    \"paymentMethod\": \"Paypal\",\n    \"hash\": \"8eec6772cb677f176827bc61ef8ba84db8b23972274a0112b95f09dc162f57f7\"\n  },\n  {\n    \"idTxn\": 10079,\n    \"user\": \"unqvducc@outlook.com\",\n    \"date\": \"2020-07-27T18:30:17.840Z\",\n    \"value\": true,\n    \"paymentMethod\": \"Tarjeta\",\n    \"hash\": \"806e2bf6a250460da885b104abc75148\"\n  },\n  {\n    \"idTxn\": 10025,\n    \"user\": \"csugrzolt@gmail.com\",\n    \"date\": \"2026-04-14T16:08:03.586Z\",\n    \"value\": 1450911,\n    \"paymentMethod\": \"Apple Pay\",\n    \"hash\": \"53fe35bdd05b0d6df4d1933d5b10d3dd2cb266dc734df98bd0a7e2d49a931d19\"\n  },\n  {\n    \"idTxn\": 0,\n    \"user\": \"uviwx@gmail.com\",\n    \"date\": \"2022-11-03T08:31:23.805Z\",\n    \"value\": 42281,\n    \"paymentMethod\": \"Transferencia\",\n    \"hash\": \"39e1ad00b0cab410f0d20a099346ba8163e67673cbe24681488d9fc80262b6e3\"\n  },\n  {\n    \"idTxn\": 10038,\n    \"user\": \"dfsihf@gmail.com\",\n    \"date\": \"2015-03-30T11:56:42.173Z\",\n    \"value\": 0,\n    \"paymentMethod\": \"undefined\",\n    \"hash\": \"75cec11e0495a16a5267b8e23dfb3c3074c9c7fdaa9e966d8be57a90197cb0c3\"\n  },\n  {\n    \"idTxn\": 10008,\n    \"user\": false,\n    \"date\": \"2017-08-30T11:07:57.877Z\",\n    \"value\": 2948568,\n    \"paymentMethod\": \"Transferencia\",\n    \"hash\": \"8df293fe16e930f9d520e8e767ec2e12ef72ed4e89e7a5df36fb1d1a07d4cd11\"\n  },\n  {\n    \"idTxn\": true,\n    \"user\": \"\",\n    \"date\": \"2017-04-19T08:33:53.440Z\",\n    \"value\": 4964342,\n    \"paymentMethod\": \"Tarjeta\",\n    \"hash\": \"0771a5312a979232a9c2738b09f51884d6b2bb967fcb72eb7a7aa232f87f8e38\"\n  },\n  {\n    \"idTxn\": 10051,\n    \"user\": \"tnva@empresa.com\",\n    \"date\": \"2018-12-27T08:43:13.319Z\",\n    \"value\": 7307,\n    \"paymentMethod\": \"Efectivo\",\n    \"hash\": \"1e003e847d532e969b6d63270ef4b4290660cf9b1f9b7e86a96a25cb7ddf8436\"\n  },\n  {\n    \"idTxn\": 10084,\n    \"user\": 256376,\n    \"date\": \"2023-04-29T23:54:05.714Z\",\n    \"value\": 3553773,\n    \"paymentMethod\": \"yQxF3OKf\",\n    \"hash\": \"2aa24c3f5748ddd58592cbcb1f4bad032676758b466d73eb91f99e0fbbdeeb58\"\n  },\n  {\n    \"idTxn\": 10089,\n    \"user\": \"bjrowsse@empresa.com\",\n    \"date\": \"2015-07-11T02:16:34.130Z\",\n    \"value\": 2559416,\n    \"paymentMethod\": \"Transferencia\",\n    \"hash\": \"0f5d52ba1e7b440306b01445e414dc096becdc60403861af075bca32af7e8e7e\"\n  },\n  {\n    \"idTxn\": 10017,\n    \"user\": \"kjqaiho@yahoo.com\",\n    \"date\": \"2018-01-15T00:18:54.899Z\",\n    \"value\": 4905081,\n    \"paymentMethod\": \"Transferencia\",\n    \"hash\": \"e872fb71031f34738f47ca338fb395c5e75faca9e8d42748ac9c3bbd3ccd6486\"\n  },\n  {\n    \"idTxn\": \"undefined\",\n    \"user\": \"kjqaiho@yahoo.com\",\n    \"date\": \"2018-01-15T00:18:56.899Z\",\n    \"value\": 1965672,\n    \"paymentMethod\": \"Transferencia\",\n    \"hash\": \"ed5a1577b74ed90045a890417ab95c38d92a3c5c2b31dec7aef0ebdeb1be940c\"\n  },\n  {\n    \"idTxn\": 10001,\n    \"user\": \"2ArJ0gof\",\n    \"date\": \"2017-08-30T11:07:50.877Z\",\n    \"value\": 1280514,\n    \"paymentMethod\": \"Efectivo\",\n    \"hash\": \"c79f78fe117e127412d9b493bd66be355b3cb04e1f12869a78732a7b0ef01852\"\n  },\n  {\n    \"idTxn\": 10041,\n    \"user\": \"tnva@empresa.com\",\n    \"date\": \"2017-09-14T18:31:14.481Z\",\n    \"value\": 1580870,\n    \"paymentMethod\": false,\n    \"hash\": \"3cc7e7a497397523f04bed375a856ce0a0a3fe5dcf75e5d6a2e0740008201671\"\n  },\n  {\n    \"idTxn\": 10053,\n    \"user\": \"cfuihepvff@yahoo.com\",\n    \"date\": true,\n    \"value\": 0,\n    \"paymentMethod\": \"Google Pay\",\n    \"hash\": \"d655f0e67dca83f3f93e578c360875a537761b62bdd76dfc4618dbabb92a622f\"\n  },\n  {\n    \"idTxn\": \"\",\n    \"user\": \"ywsq@hotmail.com\",\n    \"date\": \"2024-05-25T15:43:39.625Z\",\n    \"value\": 0,\n    \"paymentMethod\": \"Transferencia\",\n    \"hash\": \"51034cfee93cb5b63fa74d869943b38d870e1fc163e4947b95c27d02f83eea1a\"\n  },\n  {\n    \"idTxn\": false,\n    \"user\": \"tnva@empresa.com\",\n    \"date\": \"2018-04-30T10:05:04.495Z\",\n    \"value\": 688030,\n    \"paymentMethod\": \"Efectivo\",\n    \"hash\": \"780110e99653ae63a41cb1af5b26ac5aacf11f13b8a3233e61970a42d5b3f858\"\n  },\n  {\n    \"idTxn\": 10066,\n    \"user\": \"zuqkt@yahoo.com\",\n    \"date\": false,\n    \"value\": 2321881,\n    \"paymentMethod\": \"Paypal\",\n    \"hash\": \"7bb6c1d25d6ac55836ee8af512f903ea0095fa2ee9afab0aaf6277de3faedb71\"\n  },\n  {\n    \"idTxn\": 10015,\n    \"user\": \"gelurqlcu@outlook.com\",\n    \"date\": 531905,\n    \"value\": 3728089,\n    \"paymentMethod\": \"Google Pay\",\n    \"hash\": \"015ab9f05771e888157ec3b9c1119ae330c09a6c6aefc26b98e8640fd7cb4a1a\"\n  },\n  {\n    \"idTxn\": \"\",\n    \"user\": \"csugrzolt@gmail.com\",\n    \"date\": \"2026-04-14T16:08:06.586Z\",\n    \"value\": 1502635,\n    \"paymentMethod\": \"Google Pay\",\n    \"hash\": \"6312131f3ddc810eaa446bc853b2134d5dd11dc361a96dfa2702baebd6bc2f0d\"\n  },\n  {\n    \"idTxn\": 10031,\n    \"user\": \"yuzspx@outlook.com\",\n    \"date\": \"2022-05-21T06:18:43.025Z\",\n    \"value\": 0,\n    \"paymentMethod\": \"Transferencia\",\n    \"hash\": \"2c9492fe18a14ed5ce76ce6793b18eb6a3e6a710f2b06a9d49f05fb5d0178d2d\"\n  },\n  {\n    \"idTxn\": 10087,\n    \"user\": \"uzmv@empresa.com\",\n    \"date\": \"2025-09-14T05:25:29.222Z\",\n    \"value\": 4415035,\n    \"paymentMethod\": \"Paypal\",\n    \"hash\": \"ce562bf5291ec68c23aaad70cc53d259b57b04b97bd4ace80d24891f5891dc19\"\n  },\n  {\n    \"idTxn\": 10081,\n    \"user\": \"awcfjsyp@hotmail.com\",\n    \"date\": \"2020-05-22T05:04:09.670Z\",\n    \"value\": 4806806,\n    \"paymentMethod\": \"null\",\n    \"hash\": \"906977a9b6956594b9aa60335dd630c812df042e90535bf8b210cee0857becf6\"\n  },\n  {\n    \"idTxn\": 10029,\n    \"user\": \"csugrzolt@gmail.com\",\n    \"date\": \"2026-04-14T16:08:07.586Z\",\n    \"value\": 3685869,\n    \"paymentMethod\": 948324,\n    \"hash\": \"a7d4b9880abdc8d9aa95914e62b7f11d8a4966ddab3dd842bd3e85cb22167e9c\"\n  },\n  {\n    \"idTxn\": 10023,\n    \"user\": \"csugrzolt@gmail.com\",\n    \"date\": \"2026-04-14T16:08:01.586Z\",\n    \"value\": 922661,\n    \"paymentMethod\": \"Google Pay\",\n    \"hash\": \"328ca537c9c98985a74f0fac82786c7a252e3f3153fa533722622d9297646afe\"\n  },\n  {\n    \"idTxn\": 10044,\n    \"user\": \"qlbxww@yahoo.com\",\n    \"date\": \"2016-09-06T04:53:16.688Z\",\n    \"value\": 2664148,\n    \"paymentMethod\": \"Efectivo\",\n    \"hash\": \"7cedf790de30678b80dbe0fa1d461f5ad7ab66efb5e59741551b6214785e8fb3\"\n  },\n  {\n    \"idTxn\": 10039,\n    \"user\": \"tnva@empresa.com\",\n    \"date\": \"2019-02-26T20:08:58.638Z\",\n    \"value\": 3757630,\n    \"paymentMethod\": \"Google Pay\",\n    \"hash\": \"94f51ec2e3cc60a9781561d50fcee4f232327045c7709d1e82f674ca61566547\"\n  },\n  {\n    \"idTxn\": \"undefined\",\n    \"user\": \"zuqkt@yahoo.com\",\n    \"date\": \"2024-08-10T12:04:34.040Z\",\n    \"value\": 3757352,\n    \"paymentMethod\": \"Apple Pay\",\n    \"hash\": \"7b5a035e9b4a8e9c929201f30275fdb64b3f2e8186bb8a60780ee306826f2ddd\"\n  },\n  {\n    \"idTxn\": 10054,\n    \"user\": \"qlbxww@yahoo.com\",\n    \"date\": \"Ac2djW6W\",\n    \"value\": 3682408,\n    \"paymentMethod\": \"Google Pay\",\n    \"hash\": \"6e9068454f6c5bb99adc81986f7f29549863dbb81919a01682d8906eb354f5e8\"\n  },\n  {\n    \"idTxn\": 10067,\n    \"user\": \"qlbxww@yahoo.com\",\n    \"date\": \"2026-09-11T00:21:05.557Z\",\n    \"value\": 1866861,\n    \"paymentMethod\": \"Paypal\",\n    \"hash\": \"001585348f0e3afdf90d806d187e8a083fb730dfb40de059bdb65412a501ed05\"\n  },\n  {\n    \"idTxn\": 10059,\n    \"user\": \"lccbtlyt@gmail.com\",\n    \"date\": \"2021-05-29T06:35:29.945Z\",\n    \"value\": 542753,\n    \"paymentMethod\": \"Google Pay\",\n    \"hash\": \"ba53112c21c72c91556b86fc324410778f9d83acd6450a81eb5c0e112ae8123b\"\n  },\n  {\n    \"idTxn\": 10073,\n    \"user\": \"lyfgnrkkg@hotmail.com\",\n    \"date\": -31976,\n    \"value\": 1288934,\n    \"paymentMethod\": \"Tarjeta\",\n    \"hash\": \"0533f52d7c45196a3fe02e1afbbeba62531deade4d1d23f0b5cd4e21a0e8600c\"\n  },\n  {\n    \"idTxn\": 10074,\n    \"user\": \"unqvducc@outlook.com\",\n    \"date\": \"null\",\n    \"value\": 4280855,\n    \"paymentMethod\": \"Efectivo\",\n    \"hash\": \"a60a3e40cb3b8f8c0ddbec35f6414f03a882c9e4044c6134a777cf7dfc0164bf\"\n  },\n  {\n    \"idTxn\": 10005,\n    \"user\": \"uqrkeyic@empresa.com\",\n    \"date\": \"2017-08-30T11:07:54.877Z\",\n    \"value\": 1027433,\n    \"paymentMethod\": \"Tarjeta\",\n    \"hash\": \"42734ffe98efe5789f5502c139432d1921d065a26c3a4df5446e8c729ebced7d\"\n  },\n  {\n    \"idTxn\": 10062,\n    \"user\": \"cfuihepvff@yahoo.com\",\n    \"date\": \"\",\n    \"value\": 2608836,\n    \"paymentMethod\": \"undefined\",\n    \"hash\": \"2f38b86a57e0c098ac0be730d35306bb3536198cfa902c8c9e37bf787afbfa66\"\n  },\n  {\n    \"idTxn\": 10004,\n    \"user\": \"uqrkeyic@empresa.com\",\n    \"date\": \"2017-08-30T11:07:53.877Z\",\n    \"value\": 1829940,\n    \"paymentMethod\": -587145,\n    \"hash\": \"6c3bc7f53247ccdacff1b622f40b441f0f4adc74a7875c43d90f1e55b2e92995\"\n  },\n  {\n    \"idTxn\": 10021,\n    \"user\": \"kjqaiho@yahoo.com\",\n    \"date\": \"2018-01-15T00:18:58.899Z\",\n    \"value\": 1857245,\n    \"paymentMethod\": \"Apple Pay\",\n    \"hash\": \"4dcbdeccb3b960b8795d7a23b186bae1e40a05f3a95ba0d2335512c7874816a1\"\n  },\n  {\n    \"idTxn\": 10014,\n    \"user\": \"gelurqlcu@outlook.com\",\n    \"date\": \"2022-01-05T02:52:13.105Z\",\n    \"value\": 2413567,\n    \"paymentMethod\": \"Transferencia\",\n    \"hash\": \"7735d2770f71b4aeca32bc0ec1e39c45dbe19fb218700bffb6715b2d18fd4d9a\"\n  },\n  {\n    \"idTxn\": 10076,\n    \"user\": \"ppuxrod@outlook.com\",\n    \"date\": \"2016-05-20T21:18:00.523Z\",\n    \"value\": 2435936,\n    \"paymentMethod\": \"Apple Pay\",\n    \"hash\": \"782365aa294cbad723951c1cee5a1c15266319aa2ebb7296eb30a27f5f998990\"\n  },\n  {\n    \"idTxn\": 10094,\n    \"user\": \"qlbxww@yahoo.com\",\n    \"date\": \"2015-01-01T07:17:29.709Z\",\n    \"value\": 2926737,\n    \"paymentMethod\": \"Transferencia\",\n    \"hash\": \"8c947731ddc2b6b7c6c8b66d1b8b8b4747601dacfc6836693d261ef91da38c16\"\n  },\n  {\n    \"idTxn\": 10036,\n    \"user\": \"yuzspx@outlook.com\",\n    \"date\": \"2022-05-21T06:18:48.025Z\",\n    \"value\": 653275,\n    \"paymentMethod\": \"Google Pay\",\n    \"hash\": \"512d5166b9063cd36d19fa324370f282dbe0e7f07bf413b369abeb12f113e075\"\n  },\n  {\n    \"idTxn\": 10006,\n    \"user\": \"uqrkeyic@empresa.com\",\n    \"date\": \"2017-08-30T11:07:55.877Z\",\n    \"value\": 1679931,\n    \"paymentMethod\": \"Transferencia\",\n    \"hash\": \"ba823fbce8e75b1ed9d1bbfe6319564bdfe70c90ccf7c3b5e36da6474b9a8c86\"\n  },\n  {\n    \"idTxn\": \"null\",\n    \"user\": false,\n    \"date\": \"2022-01-05T02:52:09.105Z\",\n    \"value\": 185090,\n    \"paymentMethod\": -251631,\n    \"hash\": \"f7fb5bfdab340962c64d9d54b8c252ff5b13ecd653d2706dd3211f544794dfdd\"\n  },\n  {\n    \"idTxn\": 10065,\n    \"user\": \"ywsq@hotmail.com\",\n    \"date\": \"2016-05-05T12:44:20.271Z\",\n    \"value\": 4929260,\n    \"paymentMethod\": \"Transferencia\",\n    \"hash\": \"e6d0755c900f22c7bbe451a2b350033d996740b83e6828583babf92703025c81\"\n  },\n  {\n    \"idTxn\": 10050,\n    \"user\": \"LEE1mSuc\",\n    \"date\": \"2021-04-20T09:20:01.769Z\",\n    \"value\": 4513505,\n    \"paymentMethod\": \"Tarjeta\",\n    \"hash\": \"cf9770e88da54e8ac08e066b5849a9803770bfc818979651f94b3e9e0713b823\"\n  },\n  {\n    \"idTxn\": 10091,\n    \"user\": \"lyfgnrkkg@hotmail.com\",\n    \"date\": \"2021-09-08T22:27:15.912Z\",\n    \"value\": 2854447,\n    \"paymentMethod\": \"Apple Pay\",\n    \"hash\": \"d884e2eb1847efcdeb1fe6471f2bde9a903e4a8de75a727d0560a6b5113c1816\"\n  },\n  {\n    \"idTxn\": 10027,\n    \"user\": \"csugrzolt@gmail.com\",\n    \"date\": \"2026-04-14T16:08:05.586Z\",\n    \"value\": 3153066,\n    \"paymentMethod\": \"Paypal\",\n    \"hash\": \"331f4387845eab5a06743442cf783d2d083f08aa8f452d65984469f82b0badee\"\n  },\n  {\n    \"idTxn\": 10061,\n    \"user\": \"undefined\",\n    \"date\": \"2025-12-22T09:58:46.791Z\",\n    \"value\": 3128057,\n    \"paymentMethod\": \"Google Pay\",\n    \"hash\": \"\"\n  }\n]"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "Envía el dataset completo de 98 transacciones tal como lo suministró el profesor. Retorna 200/201 con total_processed=98, 72 aprobadas y 26 sospechosas."
+          }
+        }
+      ]
+    },
+    {
+      "name": "🧪 2. PRUEBAS POR TIPO DE DATO CORRUPTO EN 'USER'",
+      "item": [
+        {
+          "name": "User es un Entero Cero (user: 0)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": \"TEST-U0\",\n  \"user\": 0,\n  \"date\": \"2026-10-07T12:00:00.000\",\n  \"value\": 50000,\n  \"paymentMethod\": \"Tarjeta\",\n  \"hash\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "En el dataset original: index 15. El validador lo convierte a un email de empresa válido."
+          }
+        },
+        {
+          "name": "User es un Entero Grande (user: 256376)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": \"TEST-U-INT\",\n  \"user\": 256376,\n  \"date\": \"2026-10-07T12:00:01.000\",\n  \"value\": 3553773,\n  \"paymentMethod\": \"Tarjeta\",\n  \"hash\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "En el dataset original: index 58."
+          }
+        },
+        {
+          "name": "User es Booleano False (user: false)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": \"TEST-U-BOOL\",\n  \"user\": false,\n  \"date\": \"2026-10-07T12:00:02.000\",\n  \"value\": 2948568,\n  \"paymentMethod\": \"Transferencia\",\n  \"hash\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "En el dataset original: index 55 y 91."
+          }
+        },
+        {
+          "name": "User es Texto 'null' (user: \"null\")",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": \"TEST-U-NULL\",\n  \"user\": \"null\",\n  \"date\": \"2026-10-07T12:00:03.000\",\n  \"value\": 4928113,\n  \"paymentMethod\": \"Efectivo\",\n  \"hash\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "En el dataset original: index 3 y 12."
+          }
+        },
+        {
+          "name": "User es Texto 'undefined' (user: \"undefined\")",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": \"TEST-U-UNDEF\",\n  \"user\": \"undefined\",\n  \"date\": \"2026-10-07T12:00:04.000\",\n  \"value\": 2757259,\n  \"paymentMethod\": \"Tarjeta\",\n  \"hash\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "En el dataset original: index 46 y 97."
+          }
+        },
+        {
+          "name": "User es String Vacío (user: \"\")",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": \"TEST-U-EMPTY\",\n  \"user\": \"\",\n  \"date\": \"2026-10-07T12:00:05.000\",\n  \"value\": 2961030,\n  \"paymentMethod\": \"Tarjeta\",\n  \"hash\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "En el dataset original: index 19, 36 y 56."
+          }
+        },
+        {
+          "name": "User es String Sin Arroba (user: \"2ArJ0gof\")",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": \"TEST-U-NO-AT\",\n  \"user\": \"2ArJ0gof\",\n  \"date\": \"2026-10-07T12:00:06.000\",\n  \"value\": 1280514,\n  \"paymentMethod\": \"Efectivo\",\n  \"hash\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "En el dataset original: index 62 y 93 ('LEE1mSuc')."
+          }
+        }
+      ]
+    },
+    {
+      "name": "🧪 3. PRUEBAS POR TIPO DE DATO CORRUPTO EN 'IDTXN'",
+      "item": [
+        {
+          "name": "idTxn es String Vacío (idTxn: \"\")",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": \"\",\n  \"user\": \"pedro@empresa.com\",\n  \"date\": \"2026-10-07T12:10:00.000\",\n  \"value\": 705620,\n  \"paymentMethod\": \"Efectivo\",\n  \"hash\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "En el dataset original: index 5, 65, 69. Se autogenera TXN-UUID."
+          }
+        },
+        {
+          "name": "idTxn es Entero Cero (idTxn: 0)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": 0,\n  \"user\": \"ana@empresa.com\",\n  \"date\": \"2026-10-07T12:10:01.000\",\n  \"value\": 3983506,\n  \"paymentMethod\": \"Tarjeta\",\n  \"hash\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "En el dataset original: index 7 y 36."
+          }
+        },
+        {
+          "name": "idTxn es Booleano False (idTxn: false)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": false,\n  \"user\": \"carlos@empresa.com\",\n  \"date\": \"2026-10-07T12:10:02.000\",\n  \"value\": 1991661,\n  \"paymentMethod\": \"Tarjeta\",\n  \"hash\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "En el dataset original: index 8 y 66."
+          }
+        },
+        {
+          "name": "idTxn es Booleano True (idTxn: true)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": true,\n  \"user\": \"marta@empresa.com\",\n  \"date\": \"2026-10-07T12:10:03.000\",\n  \"value\": 4964342,\n  \"paymentMethod\": \"Tarjeta\",\n  \"hash\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "En el dataset original: index 56."
+          }
+        },
+        {
+          "name": "idTxn es Negativo (idTxn: -508008)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": -508008,\n  \"user\": \"diego@empresa.com\",\n  \"date\": \"2026-10-07T12:10:04.000\",\n  \"value\": 2803286,\n  \"paymentMethod\": \"Tarjeta\",\n  \"hash\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "En el dataset original: index 38."
+          }
+        },
+        {
+          "name": "idTxn es Texto 'null' (idTxn: \"null\")",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": \"null\",\n  \"user\": \"lucia@empresa.com\",\n  \"date\": \"2026-10-07T12:10:05.000\",\n  \"value\": 2571324,\n  \"paymentMethod\": \"Tarjeta\",\n  \"hash\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "En el dataset original: index 11, 18, 91."
+          }
+        },
+        {
+          "name": "idTxn es Texto 'undefined' (idTxn: \"undefined\")",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": \"undefined\",\n  \"user\": \"juan@empresa.com\",\n  \"date\": \"2026-10-07T12:10:06.000\",\n  \"value\": 4468632,\n  \"paymentMethod\": \"Tarjeta\",\n  \"hash\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "En el dataset original: index 13, 40, 42, 61, 76."
+          }
+        }
+      ]
+    },
+    {
+      "name": "🧪 4. PRUEBAS POR TIPO DE DATO CORRUPTO EN 'VALUE' (MONTO)",
+      "item": [
+        {
+          "name": "Value es Booleano False (value: false)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": \"VAL-FALSE\",\n  \"user\": \"test_val@empresa.com\",\n  \"date\": \"2026-10-07T12:20:00.000\",\n  \"value\": false,\n  \"paymentMethod\": \"Tarjeta\",\n  \"hash\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "En el dataset original: index 2. Se convierte a monto seguro predeterminado."
+          }
+        },
+        {
+          "name": "Value es Booleano True (value: true)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": \"VAL-TRUE\",\n  \"user\": \"test_val@empresa.com\",\n  \"date\": \"2026-10-07T12:20:01.000\",\n  \"value\": true,\n  \"paymentMethod\": \"Tarjeta\",\n  \"hash\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "En el dataset original: index 51."
+          }
+        },
+        {
+          "name": "Value es Cero (value: 0)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": \"VAL-ZERO\",\n  \"user\": \"test_val@empresa.com\",\n  \"date\": \"2026-10-07T12:20:02.000\",\n  \"value\": 0,\n  \"paymentMethod\": \"Tarjeta\",\n  \"hash\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "En el dataset original: index 1, 54, 64, 65, 70."
+          }
+        },
+        {
+          "name": "Value es Negativo (value: -66175)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": \"VAL-NEG\",\n  \"user\": \"test_val@empresa.com\",\n  \"date\": \"2026-10-07T12:20:03.000\",\n  \"value\": -66175,\n  \"paymentMethod\": \"Tarjeta\",\n  \"hash\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "En el dataset original: index 3. Se toma el valor absoluto."
+          }
+        },
+        {
+          "name": "Value es String Vacío (value: \"\")",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": \"VAL-EMPTY\",\n  \"user\": \"test_val@empresa.com\",\n  \"date\": \"2026-10-07T12:20:04.000\",\n  \"value\": \"\",\n  \"paymentMethod\": \"Tarjeta\",\n  \"hash\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "En el dataset original: index 20."
+          }
+        }
+      ]
+    },
+    {
+      "name": "🧪 5. PRUEBAS POR TIPO DE DATO CORRUPTO EN 'DATE' (TIMESTAMP)",
+      "item": [
+        {
+          "name": "Date es String Vacío (date: \"\")",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": \"DATE-EMPTY\",\n  \"user\": \"test_date@empresa.com\",\n  \"date\": \"\",\n  \"value\": 50000,\n  \"paymentMethod\": \"Tarjeta\",\n  \"hash\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "En el dataset original: index 4, 43, 83. Se asigna fecha actual segura."
+          }
+        },
+        {
+          "name": "Date es Entero Cero (date: 0)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": \"DATE-ZERO\",\n  \"user\": \"test_date@empresa.com\",\n  \"date\": 0,\n  \"value\": 50000,\n  \"paymentMethod\": \"Tarjeta\",\n  \"hash\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "En el dataset original: index 8, 49."
+          }
+        },
+        {
+          "name": "Date es Entero Negativo (date: -653667)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": \"DATE-NEG\",\n  \"user\": \"test_date@empresa.com\",\n  \"date\": -653667,\n  \"value\": 50000,\n  \"paymentMethod\": \"Tarjeta\",\n  \"hash\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "En el dataset original: index 12 y 80 (-31976)."
+          }
+        },
+        {
+          "name": "Date es Entero Epoch Offset (date: 531905)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": \"DATE-INT\",\n  \"user\": \"test_date@empresa.com\",\n  \"date\": 531905,\n  \"value\": 50000,\n  \"paymentMethod\": \"Tarjeta\",\n  \"hash\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "En el dataset original: index 68."
+          }
+        },
+        {
+          "name": "Date es Booleano True / False (date: true)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": \"DATE-BOOL\",\n  \"user\": \"test_date@empresa.com\",\n  \"date\": true,\n  \"value\": 50000,\n  \"paymentMethod\": \"Tarjeta\",\n  \"hash\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "En el dataset original: index 64 (true) y index 67 (false)."
+          }
+        },
+        {
+          "name": "Date es Texto Corrupto (date: \"Ac2djW6W\")",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": \"DATE-GARBAGE\",\n  \"user\": \"test_date@empresa.com\",\n  \"date\": \"Ac2djW6W\",\n  \"value\": 50000,\n  \"paymentMethod\": \"Tarjeta\",\n  \"hash\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "En el dataset original: index 77."
+          }
+        }
+      ]
+    },
+    {
+      "name": "🧪 6. PRUEBAS POR MÉTODOS DE PAGO Y HASH INVÁLIDOS",
+      "item": [
+        {
+          "name": "PaymentMethod es Entero Cero (paymentMethod: 0)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": \"PM-ZERO\",\n  \"user\": \"test_pm@empresa.com\",\n  \"date\": \"2026-10-07T12:30:00.000\",\n  \"value\": 50000,\n  \"paymentMethod\": 0,\n  \"hash\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "En el dataset original: index 0 y 30. Se normaliza a 'Otro'."
+          }
+        },
+        {
+          "name": "PaymentMethod es Entero Grande (paymentMethod: 948324)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": \"PM-INT\",\n  \"user\": \"test_pm@empresa.com\",\n  \"date\": \"2026-10-07T12:30:01.000\",\n  \"value\": 50000,\n  \"paymentMethod\": 948324,\n  \"hash\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "En el dataset original: index 73."
+          }
+        },
+        {
+          "name": "PaymentMethod es Entero Negativo (paymentMethod: -587145)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": \"PM-NEG\",\n  \"user\": \"test_pm@empresa.com\",\n  \"date\": \"2026-10-07T12:30:02.000\",\n  \"value\": 50000,\n  \"paymentMethod\": -587145,\n  \"hash\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "En el dataset original: index 84 y 91 (-251631)."
+          }
+        },
+        {
+          "name": "PaymentMethod es Booleano False (paymentMethod: false)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": \"PM-BOOL\",\n  \"user\": \"test_pm@empresa.com\",\n  \"date\": \"2026-10-07T12:30:03.000\",\n  \"value\": 50000,\n  \"paymentMethod\": false,\n  \"hash\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "En el dataset original: index 63."
+          }
+        },
+        {
+          "name": "PaymentMethod es Código Desconocido (paymentMethod: \"O8EtaCZM\")",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": \"PM-UNKNOWN\",\n  \"user\": \"test_pm@empresa.com\",\n  \"date\": \"2026-10-07T12:30:04.000\",\n  \"value\": 50000,\n  \"paymentMethod\": \"O8EtaCZM\",\n  \"hash\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "En el dataset original: index 14, 19, 58."
+          }
+        },
+        {
+          "name": "Hash es Truncado a 32 chars MD5",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": \"HASH-MD5\",\n  \"user\": \"test_hash@empresa.com\",\n  \"date\": \"2026-10-07T12:30:05.000\",\n  \"value\": 50000,\n  \"paymentMethod\": \"Tarjeta\",\n  \"hash\": \"27d2e12400ac40a3afa186102f578a35\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "En el dataset original: index 16 y 51. Se recalcula canónicamente."
+          }
+        },
+        {
+          "name": "Hash tiene Caracteres Inválidos '@' y '!'",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": \"HASH-BAD-CHARS\",\n  \"user\": \"test_hash@empresa.com\",\n  \"date\": \"2026-10-07T12:30:06.000\",\n  \"value\": 50000,\n  \"paymentMethod\": \"Tarjeta\",\n  \"hash\": \"bb84973a757@20!303268c31024b96719a8ef1d84f2ac10449c90487dbd8d1ca\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "En el dataset original: index 34."
+          }
+        },
+        {
+          "name": "Hash tiene Letra 'G' No Hexadecimal",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": \"HASH-LETTER-G\",\n  \"user\": \"test_hash@empresa.com\",\n  \"date\": \"2026-10-07T12:30:07.000\",\n  \"value\": 50000,\n  \"paymentMethod\": \"Tarjeta\",\n  \"hash\": \"e5bG252061b2df827a79d5b1b3a1876991887cfa9d60bff666cc0011fa82565c\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "En el dataset original: index 18."
+          }
+        }
+      ]
+    },
+    {
+      "name": "🚨 7. CASOS DE USO DE APPRESSO (SLIDING WINDOW ANTIFRAUDE)",
+      "item": [
+        {
+          "name": "Ráfaga Madrugada 00:18 - Txn 1 (Normal)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": \"BURST-NIGHT-1\",\n  \"user\": \"kjqaiho@yahoo.com\",\n  \"date\": \"2018-01-15T00:18:53.899Z\",\n  \"value\": 50000,\n  \"paymentMethod\": \"Tarjeta\",\n  \"hash\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "Primera compra del usuario a medianoche."
+          }
+        },
+        {
+          "name": "Ráfaga Madrugada 00:18 - Txn 2 (Normal)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": \"BURST-NIGHT-2\",\n  \"user\": \"kjqaiho@yahoo.com\",\n  \"date\": \"2018-01-15T00:18:54.899Z\",\n  \"value\": 50000,\n  \"paymentMethod\": \"Tarjeta\",\n  \"hash\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "Segunda compra en 1 segundo de diferencia."
+          }
+        },
+        {
+          "name": "Ráfaga Madrugada 00:18 - Txn 3 (¡DISPARA ANOMALÍA CRÍTICA!)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idTxn\": \"BURST-NIGHT-3\",\n  \"user\": \"kjqaiho@yahoo.com\",\n  \"date\": \"2018-01-15T00:18:55.899Z\",\n  \"value\": 50000,\n  \"paymentMethod\": \"Tarjeta\",\n  \"hash\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transacciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "transacciones"
+              ]
+            },
+            "description": "Tercera compra en menos de 3 segundos en franja nocturna. Dispara estado SOSPECHOSA y severidad CRÍTICO."
+          }
+        }
+      ]
+    },
+    {
+      "name": "📊 8. CONSULTAS DEL DASHBOARD (GET)",
+      "item": [
+        {
+          "name": "Estadísticas: Filtro HOY",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/dashboard/stats?periodo=hoy"
+          }
+        },
+        {
+          "name": "Estadísticas: Filtro SEMANA",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/dashboard/stats?periodo=semana"
+          }
+        },
+        {
+          "name": "Estadísticas: Filtro MES",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/dashboard/stats?periodo=mes"
+          }
+        },
+        {
+          "name": "Estadísticas: Filtro TODO (Histórico Completo)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/dashboard/stats?periodo=todo"
+          }
+        },
+        {
+          "name": "Auditoría: Listar Transacciones Recientes (Limit 50)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/transacciones?limit=50&periodo=todo"
+          }
+        },
+        {
+          "name": "Timeline de Ventana Deslizante (Usuario con Fraude)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/dashboard/timeline-sliding-window/kjqaiho@yahoo.com"
+          }
+        },
+        {
+          "name": "Directorio de Usuarios Monitoreados",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/dashboard/users-directory?periodo=todo"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -13,7 +13,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models import Usuario
+from app.models import Usuario, Transaccion, Anomalia
+from app.detector import detector
 from app.schemas import DashboardStatsResponse, ErrorResponse, TimelineResponse
 from app.services.dashboard_service import get_dashboard_stats, get_timeline, get_users_directory
 
@@ -125,6 +126,31 @@ def get_directory(
         return {"success": True, "periodo": periodo, "users": users}
     except Exception as exc:
         logger.error("Error al obtener directorio de usuarios: %s", exc, exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"success": False, "error": {"code": "INTERNAL_ERROR", "message": str(exc)}},
+        )
+
+
+@router.post(
+    "/reset",
+    summary="Limpiar base de datos y memoria",
+)
+def reset_data(db: Session = Depends(get_db)):
+    """Elimina todas las transacciones, anomalías y vacía el detector en memoria."""
+    try:
+        db.query(Anomalia).delete(synchronize_session=False)
+        db.query(Transaccion).delete(synchronize_session=False)
+        db.query(Usuario).delete(synchronize_session=False)
+        db.commit()
+        detector.reset_all()
+        return {
+            "success": True,
+            "message": "Todas las transacciones, anomalías y ventanas en memoria fueron eliminadas con éxito",
+        }
+    except Exception as exc:
+        db.rollback()
+        logger.error("Error reseteando datos: %s", exc, exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail={"success": False, "error": {"code": "INTERNAL_ERROR", "message": str(exc)}},

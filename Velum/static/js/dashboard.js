@@ -606,6 +606,38 @@ document.addEventListener('DOMContentLoaded', () => {
   // Actualizar salud cada 30 segundos
   setInterval(checkSystemHealth, 30000);
 
+  // Botón Reiniciar Datos
+  const btnReset = document.getElementById('btn-reset-data');
+  if (btnReset) {
+    btnReset.addEventListener('click', async () => {
+      if (!confirm('¿Estás seguro de que deseas eliminar todas las transacciones, anomalías y vaciar la memoria del detector? Esta acción no se puede deshacer.')) return;
+      
+      const originalText = btnReset.textContent;
+      btnReset.textContent = 'Borrando...';
+      btnReset.disabled = true;
+      
+      try {
+        const res = await fetch('/api/dashboard/reset', { method: 'POST' });
+        if (!res.ok) throw new Error('Error al reiniciar datos');
+        
+        // Limpiar terminal
+        const terminal = document.getElementById('sim-log-terminal');
+        if (terminal) terminal.innerHTML = '';
+        if (typeof seenTxnIds !== 'undefined') seenTxnIds.clear();
+        
+        // Forzar refresco global
+        window.refreshDashboard();
+        if (window.refreshSlidingWindow) window.refreshSlidingWindow();
+      } catch (e) {
+        console.error(e);
+        alert('Error al reiniciar los datos.');
+      } finally {
+        btnReset.textContent = originalText;
+        btnReset.disabled = false;
+      }
+    });
+  }
+
   // Auto-refresco en vivo cada 2.5 segundos (Telemetría + Tabla Auditoría + KPIs + Directorio)
   setInterval(() => {
     syncLiveTransactionsLog();
