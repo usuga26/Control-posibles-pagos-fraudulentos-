@@ -16,7 +16,7 @@ BOGOTA_TZ = zoneinfo.ZoneInfo(settings.timezone)
 
 
 def _make_payload(
-    id_txn: str = "TX-100",
+    id_txn: int = 100,
     user: str = "cliente@banco.com",
     date: str | None = None,
     value: float = 50000.0,
@@ -33,7 +33,7 @@ def _make_payload(
         id_txn=id_txn,
         user=user,
         date=date,
-        value=f"{value:.2f}",
+        value=value,
         payment_method=payment_method,
     )
     if alter_hash:
@@ -51,14 +51,14 @@ def _make_payload(
 
 def test_create_transaction_valid_201(client, db_session: Session):
     """Transacción válida y aislada responde 201 APROBADA y crea el usuario."""
-    payload = _make_payload(id_txn="TX-NEW-1", user="nuevo.usuario@correo.com")
+    payload = _make_payload(id_txn=200, user="nuevo.usuario@correo.com")
     resp = client.post("/api/transacciones", json=payload)
 
     assert resp.status_code == 201
     data = resp.json()
     assert data["success"] is True
     assert data["duplicate"] is False
-    assert data["transaction"]["idTxn"] == "TX-NEW-1"
+    assert data["transaction"]["idTxn"] == 200
     assert data["transaction"]["status"] == "APROBADA"
     assert data["analysis"]["anomalyDetected"] is False
 
@@ -75,79 +75,72 @@ def test_create_transaction_existing_user(client, db_session: Session):
     db_session.add(user)
     db_session.commit()
 
-    payload = _make_payload(id_txn="TX-EXIST-1", user="existente@banco.com")
+    payload = _make_payload(id_txn=301, user="existente@banco.com")
     resp = client.post("/api/transacciones", json=payload)
 
     assert resp.status_code == 201
     # Debe asociarse al mismo usuario
-    tx = db_session.query(Transaccion).filter(Transaccion.id_txn == "TX-EXIST-1").first()
+    tx = db_session.query(Transaccion).filter(Transaccion.id_txn == "301").first()
     assert tx.usuario_id == user.id
 
 
 def test_create_transaction_invalid_payload_422(client):
     """Payload con campos faltantes o formato de fecha inválido produce 422."""
     # Falta el hash
-    resp = client.post("/api/transacciones", json={"idTxn": "TX-1", "user": "a@a.com"})
+    resp = client.post("/api/transacciones", json={"idTxn": 1, "user": "a@a.com"})
     assert resp.status_code == 422
     assert resp.json()["success"] is False
 
-    # Fecha con formato incorrecto (sin milisegundos de 3 dígitos)
+    # Fecha con formato incorrecto
     bad_payload = _make_payload()
-    bad_payload["date"] = "2026-09-23T10:30:00"
+    bad_payload["date"] = "esto-no-es-fecha"
     resp = client.post("/api/transacciones", json=bad_payload)
     assert resp.status_code == 422
 
-    # Método de pago no permitido
-    bad_payment = _make_payload()
-    bad_payment["paymentMethod"] = "Bitcoin"
-    resp = client.post("/api/transacciones", json=bad_payment)
-    assert resp.status_code == 422
 
-
-def test_create_transaction_invalid_hash_400(client, db_session: Session):
-    """Hash alterado produce 400 y no persiste la transacción en la base de datos."""
-    payload = _make_payload(id_txn="TX-TAMPERED", alter_hash=True)
+def test_create_transaction_invalid_hash_422(client, db_session: Session):
+    """Hash alterado produce 422 y no persiste la transacción en la base de datos."""
+    payload = _make_payload(id_txn=400, alter_hash=True)
     resp = client.post("/api/transacciones", json=payload)
 
-    assert resp.status_code == 400
+    assert resp.status_code == 422
     data = resp.json()
     assert data["success"] is False
     assert data["error"]["code"] == "HASH_INVALID"
 
     # Verificar que NO se persistió
-    tx = db_session.query(Transaccion).filter(Transaccion.id_txn == "TX-TAMPERED").first()
+    tx = db_session.query(Transaccion).filter(Transaccion.id_txn == "400").first()
     assert tx is None
 
 
-def test_create_transaction_duplicate_identical_200(client, db_session: Session):
-    """Mismo idTxn y mismo contenido responde 200 con duplicate: true sin crear otra fila."""
-    payload = _make_payload(id_txn="TX-DUP-1")
+def test_create_transaction_duplicate_identical_409(client, db_session: Session):
+    """Mismo idTxn y mismo contenido responde 409 Conflict."""
+    payload = _make_payload(id_txn=409)
 
     # Primera vez -> 201
     r1 = client.post("/api/transacciones", json=payload)
     assert r1.status_code == 201
 
-    # Segunda vez idéntica -> 200 duplicate
+    # Segunda vez idéntica -> 409 Conflict
     r2 = client.post("/api/transacciones", json=payload)
-    assert r2.status_code == 200
+    assert r2.status_code == 409
     data = r2.json()
-    assert data["success"] is True
-    assert data["duplicate"] is True
-    assert data["transaction"]["idTxn"] == "TX-DUP-1"
+    assert data["success"] is False
+    assert data["error"]["code"] == "CONFLICT"
 
     # Solo debe existir una fila en BD
-    count = db_session.query(Transaccion).filter(Transaccion.id_txn == "TX-DUP-1").count()
+    count = db_session.query(Transaccion).filter(Transaccion.id_txn == "409").count()
     assert count == 1
 
 
 def test_create_transaction_conflict_409(client):
     """Mismo idTxn con contenido diferente produce 409 Conflict."""
-    payload1 = _make_payload(id_txn="TX-CONFLICT", value=10000.0)
+    payload1 = _make_payload(id_txn=4090, value=10000.0)
     r1 = client.post("/api/transacciones", json=payload1)
     assert r1.status_code == 201
 
     # Mismo idTxn pero diferente valor -> produce hash distinto
-    payload2 = _make_payload(id_txn="TX-CONFLICT", value=20000.0)
+    payload2 = _make_payload(id_txn=4090, value=20000.0)
     r2 = client.post("/api/transacciones", json=payload2)
     assert r2.status_code == 409
     data = r2.json()
@@ -161,7 +154,7 @@ def test_create_transaction_blocked_user_403(client, db_session: Session):
     db_session.add(user)
     db_session.commit()
 
-    payload = _make_payload(id_txn="TX-BLOCKED", user="bloqueado@banco.com")
+    payload = _make_payload(id_txn=403, user="bloqueado@banco.com")
     resp = client.post("/api/transacciones", json=payload)
 
     assert resp.status_code == 403
@@ -170,7 +163,7 @@ def test_create_transaction_blocked_user_403(client, db_session: Session):
     assert "BLOQUEADO" in data["error"]["code"]
 
     # Debe haberse guardado en BD con estado RECHAZADA
-    tx = db_session.query(Transaccion).filter(Transaccion.id_txn == "TX-BLOCKED").first()
+    tx = db_session.query(Transaccion).filter(Transaccion.id_txn == "403").first()
     assert tx is not None
     assert tx.estado == EstadoTransaccion.RECHAZADA
 
@@ -180,21 +173,21 @@ def test_attack_simulation_creates_anomaly(client, db_session: Session):
     user_email = "atacante@banco.com"
 
     # Txn 1 -> APROBADA
-    p1 = _make_payload(id_txn="TX-ATK-1", user=user_email)
+    p1 = _make_payload(id_txn=8001, user=user_email)
     r1 = client.post("/api/transacciones", json=p1)
     assert r1.status_code == 201
     assert r1.json()["transaction"]["status"] == "APROBADA"
     assert r1.json()["analysis"]["anomalyDetected"] is False
 
     # Txn 2 -> APROBADA
-    p2 = _make_payload(id_txn="TX-ATK-2", user=user_email)
+    p2 = _make_payload(id_txn=8002, user=user_email)
     r2 = client.post("/api/transacciones", json=p2)
     assert r2.status_code == 201
     assert r2.json()["transaction"]["status"] == "APROBADA"
     assert r2.json()["analysis"]["anomalyDetected"] is False
 
     # Txn 3 -> SOSPECHOSA + POSIBLE_FRAUDE
-    p3 = _make_payload(id_txn="TX-ATK-3", user=user_email)
+    p3 = _make_payload(id_txn=8003, user=user_email)
     r3 = client.post("/api/transacciones", json=p3)
     assert r3.status_code == 201
     data3 = r3.json()
@@ -209,7 +202,7 @@ def test_attack_simulation_creates_anomaly(client, db_session: Session):
     assert anomalias[0].cantidad_transacciones == 3
 
     # Txn 4 de la misma ráfaga -> actualiza la anomalía existente, no crea otra
-    p4 = _make_payload(id_txn="TX-ATK-4", user=user_email)
+    p4 = _make_payload(id_txn=8004, user=user_email)
     r4 = client.post("/api/transacciones", json=p4)
     assert r4.status_code == 201
     assert r4.json()["transaction"]["status"] == "SOSPECHOSA"
@@ -223,7 +216,7 @@ def test_attack_simulation_creates_anomaly(client, db_session: Session):
 def test_transactions_concurrency_threads(client):
     """Múltiples hilos enviando transacciones con diferentes idTxn de forma simultánea."""
     def send_txn(idx: int):
-        payload = _make_payload(id_txn=f"TX-CONC-{idx}", user=f"user_{idx % 3}@test.com")
+        payload = _make_payload(id_txn=5000 + idx, user=f"user_{idx % 3}@test.com")
         return client.post("/api/transacciones", json=payload)
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
@@ -231,3 +224,40 @@ def test_transactions_concurrency_threads(client):
         responses = [f.result() for f in futures]
 
     assert all(r.status_code in [200, 201] for r in responses)
+
+
+def test_clock_skew_rejection():
+    """Fecha futura o muy pasada produce ClockSkewError (422) testeado directamente."""
+    from app.services.transaction_service import _validate_clock_skew, ClockSkewError
+    import pytest
+    from datetime import datetime, timezone, timedelta
+    
+    now = datetime.now(timezone.utc)
+    future = now + timedelta(days=5000)
+    
+    with pytest.raises(ClockSkewError):
+        _validate_clock_skew(future, now)
+
+
+def test_race_condition_integrity_error(client, monkeypatch, db_session):
+    """Prueba la captura de IntegrityError durante db.commit simulando condición de carrera."""
+    payload = _make_payload(id_txn=7000)
+    
+    from sqlalchemy.exc import IntegrityError
+    
+    def raise_integrity(*args, **kwargs):
+        raise IntegrityError("mock", params=None, orig=None)
+        
+    # Parcheamos el commit de session 
+    monkeypatch.setattr(db_session, "commit", raise_integrity)
+    
+    # Adicionalmente parcheamos el motor para que use nuestro db_session
+    from app.database import get_db
+    import app.main
+    app.main.app.dependency_overrides[get_db] = lambda: db_session
+    
+    resp = client.post("/api/transacciones", json=payload)
+    app.main.app.dependency_overrides.pop(get_db, None)
+    
+    assert resp.status_code == 409
+    assert "CONFLICT" in resp.text

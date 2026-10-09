@@ -253,3 +253,27 @@ def test_frontend_and_static_assets_served(client):
     ]:
         resp_static = client.get(path)
         assert resp_static.status_code == 200, f"Fallo al servir {path}"
+
+
+def test_dashboard_usuarios(client, db_session: Session):
+    """Cobertura del endpoint de usuarios."""
+    u1 = Usuario(email="userlist@test.com", nombre="User List", estado=EstadoUsuario.ACTIVO)
+    db_session.add(u1)
+    db_session.commit()
+    t1 = Transaccion(
+        id_txn="TX-LIST-1",
+        usuario_id=u1.id,
+        valor=Decimal("100000.00"),
+        fecha_txn=datetime.now(timezone.utc),
+        fecha_recepcion=datetime.now(timezone.utc),
+        estado=EstadoTransaccion.APROBADA,
+        hash="a" * 64,
+        metodo_pago="Tarjeta",
+    )
+    db_session.add(t1)
+    db_session.commit()
+
+    resp = client.get("/api/dashboard/users-directory?periodo=hoy")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data["users"]) > 0

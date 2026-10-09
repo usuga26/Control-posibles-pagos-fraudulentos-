@@ -92,7 +92,7 @@ def _parse_client_date(date_str: str) -> datetime:
     if is_utc_explicit:
         clean_str = clean_str[:-1]
 
-    dt_naive = datetime.strptime(clean_str, "%Y-%m-%dT%H:%M:%S.%f")
+    dt_naive = datetime.fromisoformat(clean_str)
     if is_utc_explicit:
         return dt_naive.replace(tzinfo=timezone.utc)
     return dt_naive.replace(tzinfo=ZoneInfo(settings.timezone)).astimezone(timezone.utc)
@@ -195,7 +195,6 @@ def process_transaction(
     if not ignore_clock_skew:
         _validate_clock_skew(client_dt_utc, received_at)
 
-    # 2. Recalcular hash y comparar
     expected_hash = compute_hash(
         id_txn=payload.id_txn,
         user=str(payload.user),
@@ -204,31 +203,20 @@ def process_transaction(
         payment_method=payload.payment_method,
     )
     if not safe_compare(expected_hash, payload.hash):
-        if payload.hash == "0" * 64 or payload.id_txn == "TX-TAMPERED":
-            logger.warning("Hash inválido para idTxn=%s user=%s", payload.id_txn, payload.user)
-            raise HashInvalidError(f"Hash inválido para idTxn={payload.id_txn}")
-        if ignore_clock_skew:
-            payload.hash = expected_hash
-        else:
-            logger.warning("Hash inválido para idTxn=%s user=%s", payload.id_txn, payload.user)
-            raise HashInvalidError(f"Hash inválido para idTxn={payload.id_txn}")
+        logger.warning("Hash inválido para idTxn=%s user=%s", payload.id_txn, payload.user)
+        raise HashInvalidError(f"Hash inválido para idTxn={payload.id_txn}")
 
     with _db_write_lock:
         # 3. Verificar idempotencia
         existing_txn = db.query(Transaccion).filter(
-            Transaccion.id_txn == payload.id_txn
+            Transaccion.id_txn == str(payload.id_txn)
         ).first()
 
         if existing_txn is not None:
-            # Mismo idTxn: comparar hash para determinar si es duplicado idéntico o conflicto
-            if safe_compare(existing_txn.hash, payload.hash):
-                logger.info("Transacción duplicada idéntica: idTxn=%s", payload.id_txn)
-                raise DuplicateTransactionError(existing_txn)
-            else:
-                logger.warning("Conflicto de idTxn=%s con contenido distinto", payload.id_txn)
-                raise ConflictTransactionError(
-                    f"idTxn={payload.id_txn} ya existe con contenido diferente"
-                )
+            logger.warning("Conflicto de idTxn=%s", payload.id_txn)
+            raise ConflictTransactionError(
+                f"idTxn={payload.id_txn} ya existe"
+            )
 
         # 4. Obtener o crear usuario
         email_normalized = str(payload.user).lower().strip()
@@ -241,7 +229,7 @@ def process_transaction(
                 email_normalized, received_at.timestamp()
             )
             txn = Transaccion(
-                id_txn=payload.id_txn,
+                id_txn=str(payload.id_txn),
                 usuario_id=user.id,
                 valor=payload.value,
                 fecha_txn=client_dt_utc,
@@ -270,7 +258,7 @@ def process_transaction(
         # 8. Persistir transacción y anomalía en una sola transacción de BD
         try:
             txn = Transaccion(
-                id_txn=payload.id_txn,
+                id_txn=str(payload.id_txn),
                 usuario_id=user.id,
                 valor=payload.value,
                 fecha_txn=client_dt_utc,
@@ -348,10 +336,10 @@ def process_transaction(
             logger.error("IntegrityError al persistir transacción idTxn=%s: %s", payload.id_txn, exc)
             # Podría ser una carrera en idTxn
             existing_txn = db.query(Transaccion).filter(
-                Transaccion.id_txn == payload.id_txn
+                Transaccion.id_txn == str(payload.id_txn)
             ).first()
-            if existing_txn and safe_compare(existing_txn.hash, payload.hash):
-                raise DuplicateTransactionError(existing_txn) from exc
+            if existing_txn:
+                raise ConflictTransactionError(f"idTxn={payload.id_txn} ya existe") from exc
             raise ConflictTransactionError(
                 f"Conflicto al persistir idTxn={payload.id_txn}"
             ) from exc
@@ -374,7 +362,7 @@ def process_transaction(
         duplicate=False,
         transaction=TransaccionInfo(
             id=txn_id,
-            idTxn=payload.id_txn,
+            idTxn=str(payload.id_txn),
             status=estado.value,
         ),
         analysis=analysis,

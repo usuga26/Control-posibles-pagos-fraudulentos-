@@ -29,6 +29,9 @@ class Settings(BaseSettings):
     # Zona horaria del negocio (para franjas horarias)
     timezone: str = "America/Bogota"
 
+    # Llave secreta para HMAC-SHA256
+    secret_key: str = "mi_llave_privada_123"
+
     # Entorno
     environment: str = "development"
 
